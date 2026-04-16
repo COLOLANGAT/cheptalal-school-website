@@ -86,41 +86,36 @@ function previewPhotos(event) {
     // Photos will be previewed on upload
 }
 
-// Upload Photos
+// Upload Photos via Cloudinary
 function uploadPhotos() {
-    const photoInput = document.getElementById('photoInput');
     const caption = document.getElementById('photoCaption').value;
     const messageDiv = document.getElementById('photoMessage');
 
-    if (!photoInput.files.length) {
-        showMessage('Please select at least one photo', 'error', messageDiv);
-        return;
-    }
+    const myWidget = cloudinary.createUploadWidget(
+        {
+            cloudName: 'dwa3uy1bv',
+            uploadPreset: 'school_photoso',
+            multiple: true,
+            maxFiles: 10
+        },
+        (error, result) => {
+            if (!error && result && result.event === 'queues-end') {
+                let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+                
+                result.info.files.forEach((file) => {
+                    const photoData = {
+                        id: Date.now() + Math.random(),
+                        image: file.uploadInfo.secure_url,
+                        caption: caption || 'School Photo',
+                        date: new Date().toLocaleDateString()
+                    };
+                    photos.push(photoData);
+                });
 
-    const files = photoInput.files;
-    const photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
-
-    let uploadedCount = 0;
-
-    for (let file of files) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const photoData = {
-                id: Date.now() + Math.random(),
-                image: e.target.result,
-                caption: caption || `Photo ${photos.length + 1}`,
-                date: new Date().toLocaleDateString()
-            };
-
-            photos.push(photoData);
-            uploadedCount++;
-
-            if (uploadedCount === files.length) {
                 localStorage.setItem('galleryPhotos', JSON.stringify(photos));
-                showMessage(`${uploadedCount} photo(s) uploaded successfully!`, 'success', messageDiv);
+                showMessage(`Photo(s) uploaded successfully!`, 'success', messageDiv);
 
                 // Reset form
-                photoInput.value = '';
                 document.getElementById('photoCaption').value = '';
 
                 // Reload gallery
@@ -128,10 +123,13 @@ function uploadPhotos() {
 
                 // Update dashboard
                 updateDashboard();
+            } else if (error) {
+                showMessage('Error uploading photo: ' + error.message, 'error', messageDiv);
             }
-        };
-        reader.readAsDataURL(file);
-    }
+        }
+    );
+
+    myWidget.open();
 }
 
 // Load Gallery

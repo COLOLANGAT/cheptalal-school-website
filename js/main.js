@@ -67,9 +67,8 @@ function autoSlide() {
     }, 5000); // Change slide every 5 seconds
 }
 
-// Load and Initialize Gallery Slider from localStorage
+// Load and Initialize Gallery Slider with Hard-Coded Photos
 function initializeGallerySlider() {
-    const photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
     const photoSlider = document.getElementById('photoSlider');
     const dotsContainer = document.getElementById('dotsContainer');
     
@@ -78,43 +77,25 @@ function initializeGallerySlider() {
         photoSlider.innerHTML = '';
         dotsContainer.innerHTML = '';
         
-        // Use uploaded photos if available, otherwise use placeholders
-        if (photos.length > 0) {
-            // Create slides from uploaded photos
-            photos.forEach((photo, index) => {
-                const slide = document.createElement('div');
-                slide.className = 'slide fade';
-                slide.innerHTML = `<img src="${photo.image}" alt="${photo.caption}">`;
-                photoSlider.appendChild(slide);
-                
-                // Create dot
-                const dot = document.createElement('span');
-                dot.className = 'dot';
-                dot.onclick = () => currentSlide(index + 1);
-                dotsContainer.appendChild(dot);
-            });
-        } else {
-            // Show placeholder slides if no photos uploaded
-            const placeholders = [
-                { src: 'assets/placeholder-slide-1.svg', alt: 'School Campus' },
-                { src: 'assets/placeholder-slide-2.svg', alt: 'Students' },
-                { src: 'assets/placeholder-slide-3.svg', alt: 'Activities' },
-                { src: 'assets/placeholder-slide-4.svg', alt: 'Events' }
-            ];
+        // Hard-coded school photos
+        const photos = [
+            { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg', alt: 'School Campus Photo 1' },
+            { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.21 AM.jpeg', alt: 'School Campus Photo 2' }
+        ];
+        
+        // Create slides from hard-coded photos
+        photos.forEach((photo, index) => {
+            const slide = document.createElement('div');
+            slide.className = 'slide fade';
+            slide.innerHTML = `<img src="${photo.src}" alt="${photo.alt}">`;
+            photoSlider.appendChild(slide);
             
-            placeholders.forEach((placeholder, index) => {
-                const slide = document.createElement('div');
-                slide.className = 'slide fade';
-                slide.innerHTML = `<img src="${placeholder.src}" alt="${placeholder.alt}">`;
-                photoSlider.appendChild(slide);
-                
-                // Create dot
-                const dot = document.createElement('span');
-                dot.className = 'dot';
-                dot.onclick = () => currentSlide(index + 1);
-                dotsContainer.appendChild(dot);
-            });
-        }
+            // Create dot
+            const dot = document.createElement('span');
+            dot.className = 'dot';
+            dot.onclick = () => currentSlide(index + 1);
+            dotsContainer.appendChild(dot);
+        });
         
         // Initialize slider
         slideIndex = 1;
