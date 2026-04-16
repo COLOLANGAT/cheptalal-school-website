@@ -7,13 +7,30 @@
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        // Check if admin is logged in
+        window.addEventListener('load', () => {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            window.location.href = '../index.html';
+        }
+    </script>
 </head>
 <body>
     <!-- Admin Navigation -->
     <nav class="admin-navbar">
         <div class="admin-container">
             <h2>Admin Dashboard</h2>
-            <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Website</a>
+            <div style="display: flex; gap: 15px;">
+                <button onclick="logout()" class="logout-btn" style="padding: 8px 16px; background: #E74C3C; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Website</a>
+            </div>
         </div>
     </nav>
 
