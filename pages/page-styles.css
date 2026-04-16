@@ -572,6 +572,67 @@
     font-style: italic;
 }
 
+/* Means of Payment Section */
+.payment-section {
+    background: white;
+    padding: 40px;
+    border: 2px solid #E0E0E0;
+    border-radius: 10px;
+    margin: 40px 0;
+}
+
+.payment-content {
+    margin-top: 20px;
+}
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.payment-method {
+    background: linear-gradient(135deg, rgba(0, 61, 165, 0.05) 0%, rgba(231, 76, 60, 0.05) 100%);
+    border: 2px solid #E0E0E0;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.payment-method:hover {
+    border-color: #003DA5;
+    box-shadow: 0 8px 20px rgba(0, 61, 165, 0.15);
+    transform: translateY(-5px);
+}
+
+.payment-method i {
+    font-size: 40px;
+    color: #003DA5;
+    margin-bottom: 15px;
+}
+
+.payment-method h3 {
+    color: #003DA5;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.payment-method p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+}
+
+.payment-method p:last-child {
+    margin-bottom: 0;
+}
+
+.payment-method strong {
+    color: #E74C3C;
+}
+
 /* Admission Form */
 .form-section {
     background: white;
@@ -1122,5 +1183,34 @@
 
     .fees-section h2 {
         font-size: 22px;
+    }
+
+    /* Responsive Payment Section */
+    .payment-section {
+        padding: 20px;
+    }
+
+    .payment-section h2 {
+        font-size: 22px;
+    }
+
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-method {
+        padding: 20px;
+    }
+
+    .payment-method i {
+        font-size: 32px;
+    }
+
+    .payment-method h3 {
+        font-size: 16px;
+    }
+
+    .payment-method p {
+        font-size: 13px;
     }
 }
