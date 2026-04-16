@@ -86,50 +86,61 @@ function previewPhotos(event) {
     // Photos will be previewed on upload
 }
 
-// Upload Photos via Cloudinary
+// Upload Photos via Cloudinary API
 function uploadPhotos() {
+    const photoInput = document.getElementById('photoInput');
     const caption = document.getElementById('photoCaption').value;
     const messageDiv = document.getElementById('photoMessage');
 
-    const myWidget = cloudinary.createUploadWidget(
-        {
-            cloudName: 'dwa3uy1bv',
-            uploadPreset: 'school_photoso',
-            multiple: true,
-            maxFiles: 10
-        },
-        (error, result) => {
-            if (!error && result && result.event === 'queues-end') {
-                let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
-                
-                result.info.files.forEach((file) => {
-                    const photoData = {
-                        id: Date.now() + Math.random(),
-                        image: file.uploadInfo.secure_url,
-                        caption: caption || 'School Photo',
-                        date: new Date().toLocaleDateString()
-                    };
-                    photos.push(photoData);
-                });
+    if (!photoInput.files.length) {
+        showMessage('Please select at least one photo', 'error', messageDiv);
+        return;
+    }
 
+    const files = photoInput.files;
+    let uploadedCount = 0;
+    let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+
+    showMessage('Uploading photos...', 'success', messageDiv);
+
+    for (let file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'school_photoso');
+        formData.append('cloud_name', 'dwa3uy1bv');
+
+        fetch('https://api.cloudinary.com/v1_1/dwa3uy1bv/image/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.secure_url) {
+                const photoData = {
+                    id: Date.now() + Math.random(),
+                    image: data.secure_url,
+                    caption: caption || 'School Photo',
+                    date: new Date().toLocaleDateString()
+                };
+                photos.push(photoData);
+                uploadedCount++;
+
+                // Save after each successful upload
                 localStorage.setItem('galleryPhotos', JSON.stringify(photos));
-                showMessage(`Photo(s) uploaded successfully!`, 'success', messageDiv);
 
-                // Reset form
-                document.getElementById('photoCaption').value = '';
-
-                // Reload gallery
-                loadGallery();
-
-                // Update dashboard
-                updateDashboard();
-            } else if (error) {
-                showMessage('Error uploading photo: ' + error.message, 'error', messageDiv);
+                if (uploadedCount === files.length) {
+                    showMessage(`${uploadedCount} photo(s) uploaded successfully!`, 'success', messageDiv);
+                    photoInput.value = '';
+                    document.getElementById('photoCaption').value = '';
+                    loadGallery();
+                    updateDashboard();
+                }
             }
-        }
-    );
-
-    myWidget.open();
+        })
+        .catch(error => {
+            showMessage('Error uploading photo: ' + error.message, 'error', messageDiv);
+        });
+    }
 }
 
 // Load Gallery
@@ -298,53 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Drag and drop for file inputs
-function setupDragAndDrop(inputId) {
-    const fileInput = document.getElementById(inputId);
-    const fileLabel = fileInput.nextElementSibling;
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        fileLabel.addEventListener(eventName, preventDefaults, false);
-    });
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        fileLabel.addEventListener(eventName, highlight, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        fileLabel.addEventListener(eventName, unhighlight, false);
-    });
-
-    fileLabel.addEventListener('drop', handleDrop(fileInput), false);
-}
-
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-function highlight(e) {
-    this.style.borderColor = '#E74C3C';
-    this.style.backgroundColor = 'rgba(231, 76, 60, 0.05)';
-}
-
-function unhighlight(e) {
-    this.style.borderColor = '#003DA5';
-    this.style.backgroundColor = '';
-}
-
-function handleDrop(fileInput) {
-    return (e) => {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        fileInput.files = files;
-
-        // Trigger change event
-        const event = new Event('change', { bubbles: true });
-        fileInput.dispatchEvent(event);
-    };
-}
+// Drag and drop removed - using direct Cloudinary API
 
 // Setup drag and drop
-setupDragAndDrop('logoInput');
-setupDragAndDrop('photoInput');
+// Removed - using direct file upload instead
