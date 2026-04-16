@@ -668,6 +668,12 @@
     font-size: 14px;
 }
 
+.form-group label:has(input[type="checkbox"]) {
+    display: inline;
+    margin-bottom: 0;
+    font-weight: 400;
+}
+
 .form-group input,
 .form-group textarea,
 .form-group select {
