@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admissions - CHEPTALAL GIRLS SECONDARY SCHOOL</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="page-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <img id="schoolLogo" src="../assets/placeholder-logo.svg" alt="School Logo" class="logo">
+                <div class="school-name">
+                    <h1>CHEPTALAL</h1>
+                    <p>GIRLS SECONDARY SCHOOL</p>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About</a></li>
+                <li><a href="academics.html" class="nav-link">Academics</a></li>
+                <li><a href="#admissions" class="nav-link">Admissions</a></li>
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+                <li><a href="../admin/admin.html" class="nav-link admin-link">Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Admissions</h1>
+            <p>Join Our Community of Excellence</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="page-content" id="admissions">
+        <div class="container">
+            <!-- Admission Requirements -->
+            <section class="requirements-section">
+                <h2>Admission Requirements</h2>
+                <div class="requirements-grid">
+                    <div class="requirement-card">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Form 1 Entry</h3>
+                        <ul>
+                            <li>KCPE Certificate</li>
+                            <li>Birth Certificate</li>
+                            <li>Academic Records</li>
+                            <li>Medical Report</li>
+                        </ul>
+                    </div>
+
+                    <div class="requirement-card">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Transfer Students</h3>
+                        <ul>
+                            <li>Transfer Certificate</li>
+                            <li>Academic Records</li>
+                            <li>Parent Letter</li>
+                            <li>Medical Report</li>
+                        </ul>
+                    </div>
+
+                    <div class="requirement-card">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Documentation</h3>
+                        <ul>
+                            <li>Parent ID Copy</li>
+                            <li>Student Photo</li>
+                            <li>Immunization Records</li>
+                            <li>Guardian Details</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admission Timeline -->
+            <section class="timeline-section">
+                <h2>Admission Timeline</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">March-April</div>
+                        <div class="timeline-content">
+                            <h4>Application Opening</h4>
+                            <p>Admission applications open. Interested students and parents should submit their applications.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">May-June</div>
+                        <div class="timeline-content">
+                            <h4>Application Review</h4>
+                            <p>School reviews submitted applications and conducts interviews with shortlisted candidates.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">July</div>
+                        <div class="timeline-content">
+                            <h4>Admission Letters</h4>
+                            <p>Admission letters are issued to successful candidates.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">August</div>
+                        <div class="timeline-content">
+                            <h4>School Opens</h4>
+                            <p>New students report to school for orientation and academic programs begin.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Fees Information -->
+            <section class="fees-section">
+                <h2>School Fees</h2>
+                <div class="fees-content">
+                    <p>School fees are structured to ensure quality education while remaining accessible. Payment can be made in installments.</p>
+                    <div class="fees-grid">
+                        <div class="fee-box">
+                            <h3>Tuition</h3>
+                            <p>₦150,000</p>
+                            <p class="subtitle">Per Term</p>
+                        </div>
+
+                        <div class="fee-box">
+                            <h3>Boarding</h3>
+                            <p>₦80,000</p>
+                            <p class="subtitle">Per Term</p>
+                        </div>
+
+                        <div class="fee-box">
+                            <h3>Activities</h3>
+                            <p>₦25,000</p>
+                            <p class="subtitle">Per Year</p>
+                        </div>
+
+                        <div class="fee-box">
+                            <h3>Uniforms</h3>
+                            <p>₦15,000</p>
+                            <p class="subtitle">One Time</p>
+                        </div>
+                    </div>
+                    <p class="note">* Fees are subject to change. Scholarships and bursaries are available for deserving students.</p>
+                </div>
+            </section>
+
+            <!-- Application Form -->
+            <section class="form-section">
+                <h2>Online Admission Application</h2>
+                <form class="admission-form" onsubmit="submitAdmission(event)">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="studentName">Student Full Name *</label>
+                            <input type="text" id="studentName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth *</label>
+                            <input type="date" id="dateOfBirth" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="currentForm">Current Form *</label>
+                            <select id="currentForm" required>
+                                <option value="">Select Form</option>
+                                <option value="form1">Form 1</option>
+                                <option value="form2">Form 2</option>
+                                <option value="form3">Form 3</option>
+                                <option value="form4">Form 4</option>
+                                <option value="other">Transfer - Other Form</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="parentName">Parent/Guardian Name *</label>
+                            <input type="text" id="parentName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="parentPhone">Parent Phone Number *</label>
+                            <input type="tel" id="parentPhone" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="currentSchool">Current School *</label>
+                        <input type="text" id="currentSchool" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="achievements">Academic/Co-curricular Achievements</label>
+                        <textarea id="achievements" rows="4" placeholder="Describe your achievements..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="boarding">Boarding Preference *</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="boarding" value="yes"> Day Boarder</label>
+                            <label><input type="radio" name="boarding" value="no"> Boarding Student</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><input type="checkbox" id="terms" required> I agree to the school terms and conditions</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Application
+                    </button>
+                </form>
+                <div id="formMessage"></div>
+            </section>
+
+            <!-- FAQ -->
+            <section class="faq-section">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-items">
+                    <div class="faq-item">
+                        <h3>What are the selection criteria?</h3>
+                        <p>Selection is based on academic performance, co-curricular activities, and aptitude. We seek well-rounded students who can contribute positively to the school community.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Are there scholarships available?</h3>
+                        <p>Yes, we offer scholarships and bursaries to deserving students based on merit and need. Interested applicants should inquire during the application process.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Can I apply for mid-year admission?</h3>
+                        <p>Mid-year admissions are considered on a case-by-case basis subject to availability of spaces and meeting admission requirements.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>What documents do I need to bring on reporting day?</h3>
+                        <p>Original birth certificate, admission letter, medical report, immunization certificate, and school fees receipt are required.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact CTA -->
+            <section class="cta-box">
+                <h2>Have Questions?</h2>
+                <p>Contact our admissions office for more information about joining CHEPTALAL GIRLS SECONDARY SCHOOL.</p>
+                <a href="contact.html" class="btn btn-primary">Contact Us</a>
+            </section>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About School</h3>
+                    <p>CHEPTALAL GIRLS SECONDARY SCHOOL is dedicated to providing quality education and developing responsible citizens.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="academics.html">Academics</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p>Email: info@cheptalal.edu.ke</p>
+                    <p>Phone: +254 XXX XXX XXX</p>
+                    <p>Location: Cheptalal, Kenya</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CHEPTALAL GIRLS SECONDARY SCHOOL. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="admissions.js"></script>
+</body>
+</html>

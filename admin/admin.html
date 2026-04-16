@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - CHEPTALAL GIRLS SECONDARY SCHOOL</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Admin Navigation -->
+    <nav class="admin-navbar">
+        <div class="admin-container">
+            <h2>Admin Dashboard</h2>
+            <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Website</a>
+        </div>
+    </nav>
+
+    <div class="admin-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <ul class="admin-menu">
+                <li><a href="#dashboard" class="menu-item active" onclick="showTab('dashboard')">Dashboard</a></li>
+                <li><a href="#logo" class="menu-item" onclick="showTab('logo')">Upload Logo</a></li>
+                <li><a href="#gallery" class="menu-item" onclick="showTab('gallery')">Upload Photos</a></li>
+                <li><a href="#school-info" class="menu-item" onclick="showTab('school-info')">School Info</a></li>
+                <li><a href="#events" class="menu-item" onclick="showTab('events')">Events</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="admin-content">
+            <!-- Dashboard Tab -->
+            <section id="dashboard" class="tab-content active">
+                <h1>Dashboard</h1>
+                <div class="dashboard-grid">
+                    <div class="dash-card">
+                        <i class="fas fa-image"></i>
+                        <h3>Gallery Images</h3>
+                        <p id="imageCount">0</p>
+                    </div>
+                    <div class="dash-card">
+                        <i class="fas fa-logo"></i>
+                        <h3>Logo Status</h3>
+                        <p id="logoStatus">Not Uploaded</p>
+                    </div>
+                    <div class="dash-card">
+                        <i class="fas fa-calendar"></i>
+                        <h3>Events</h3>
+                        <p id="eventCount">0</p>
+                    </div>
+                    <div class="dash-card">
+                        <i class="fas fa-cog"></i>
+                        <h3>Settings</h3>
+                        <p>Configured</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logo Upload Tab -->
+            <section id="logo" class="tab-content">
+                <h1>Upload School Logo</h1>
+                <div class="upload-container">
+                    <div class="logo-preview" id="logoPreview">
+                        <i class="fas fa-image"></i>
+                        <p>Logo Preview</p>
+                    </div>
+                    
+                    <div class="upload-form">
+                        <div class="form-group">
+                            <label for="logoInput">Select Logo Image</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="logoInput" accept="image/*" onchange="previewLogo(event)">
+                                <label for="logoInput" class="file-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>Click to select or drag and drop</span>
+                                </label>
+                            </div>
+                            <p class="hint">Recommended size: 500x500px. Format: PNG, JPG, GIF</p>
+                        </div>
+
+                        <button onclick="uploadLogo()" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload Logo
+                        </button>
+                    </div>
+
+                    <div id="logoMessage"></div>
+                </div>
+            </section>
+
+            <!-- Photo Gallery Tab -->
+            <section id="gallery" class="tab-content">
+                <h1>Upload Photos</h1>
+                <div class="gallery-container">
+                    <div class="upload-area">
+                        <div class="form-group">
+                            <label for="photoInput">Select Photos</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="photoInput" accept="image/*" multiple onchange="previewPhotos(event)">
+                                <label for="photoInput" class="file-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>Click to select or drag and drop multiple photos</span>
+                                </label>
+                            </div>
+                            <p class="hint">You can select multiple photos at once</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="photoCaption">Photo Caption (Optional)</label>
+                            <input type="text" id="photoCaption" placeholder="Enter caption for the photo">
+                        </div>
+
+                        <button onclick="uploadPhotos()" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload Photos
+                        </button>
+                    </div>
+
+                    <div id="photoMessage"></div>
+
+                    <!-- Photo Gallery Preview -->
+                    <div class="photos-gallery" id="photosGallery">
+                        <h2>Uploaded Photos</h2>
+                        <div id="galleryItems" class="gallery-items">
+                            <!-- Photos will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- School Info Tab -->
+            <section id="school-info" class="tab-content">
+                <h1>School Information</h1>
+                <form class="info-form" onsubmit="saveSchoolInfo(event)">
+                    <div class="form-group">
+                        <label for="schoolName">School Name</label>
+                        <input type="text" id="schoolName" value="CHEPTALAL GIRLS SECONDARY SCHOOL" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="established">Year Established</label>
+                        <input type="number" id="established" placeholder="e.g., 1995" value="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motto">School Motto</label>
+                        <input type="text" id="motto" placeholder="Enter school motto">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">School Email</label>
+                        <input type="email" id="email" placeholder="info@school.edu.ke">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Contact Phone</label>
+                        <input type="tel" id="phone" placeholder="+254 XXX XXX XXX">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" placeholder="e.g., Cheptalal, Kenya">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="about">About School</label>
+                        <textarea id="about" rows="5" placeholder="Enter school description..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Information
+                    </button>
+                </form>
+                <div id="infoMessage"></div>
+            </section>
+
+            <!-- Events Tab -->
+            <section id="events" class="tab-content">
+                <h1>Manage Events</h1>
+                <form class="event-form" onsubmit="addEvent(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventTitle">Event Title</label>
+                            <input type="text" id="eventTitle" placeholder="e.g., Annual Sports Day" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventDate">Event Date</label>
+                            <input type="date" id="eventDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventDescription">Description</label>
+                        <textarea id="eventDescription" rows="4" placeholder="Event description..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventLocation">Location</label>
+                        <input type="text" id="eventLocation" placeholder="Where will the event be held?">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Event
+                    </button>
+                </form>
+
+                <div id="eventMessage"></div>
+
+                <div class="events-list">
+                    <h2>Upcoming Events</h2>
+                    <div id="eventsList">
+                        <!-- Events will be displayed here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

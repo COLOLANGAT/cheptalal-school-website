@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <!-- School Logo -->
+    <defs>
+        <style>
+            .logo-text { font-family: Arial, sans-serif; font-weight: bold; }
+            .logo-accent { fill: #003DA5; }
+            .logo-red { fill: #E74C3C; }
+        </style>
+    </defs>
+    
+    <!-- Background Circle -->
+    <circle cx="100" cy="100" r="95" fill="#FFFFFF" stroke="#003DA5" stroke-width="3"/>
+    
+    <!-- Inner Circle -->
+    <circle cx="100" cy="100" r="85" fill="none" stroke="#E74C3C" stroke-width="2"/>
+    
+    <!-- Book Symbol -->
+    <g transform="translate(100, 75)">
+        <!-- Book left page -->
+        <path d="M -20 -10 L -5 -10 L -5 30 L -20 30 Z" fill="#003DA5" stroke="#003DA5" stroke-width="2"/>
+        <!-- Book right page -->
+        <path d="M 5 -10 L 20 -10 L 20 30 L 5 30 Z" fill="#E74C3C" stroke="#E74C3C" stroke-width="2"/>
+        <!-- Book spine -->
+        <line x1="-5" y1="-10" x2="5" y2="-10" stroke="#FFFFFF" stroke-width="1"/>
+        <line x1="-5" y1="30" x2="5" y2="30" stroke="#FFFFFF" stroke-width="1"/>
+    </g>
+    
+    <!-- Torch/Light Symbol (for enlightenment) -->
+    <g transform="translate(70, 65)">
+        <rect x="0" y="8" width="4" height="12" fill="#8B4513"/>
+        <path d="M 2 -5 L -3 8 L 7 8 Z" fill="#FFD700"/>
+    </g>
+    
+    <!-- Crown Symbol -->
+    <g transform="translate(130, 65)">
+        <circle cx="0" cy="0" r="3" fill="#E74C3C"/>
+        <path d="M -5 2 L -3 -3 L 0 0 L 3 -3 L 5 2 Z" fill="#003DA5"/>
+    </g>
+    
+    <!-- School Name/Initials -->
+    <text x="100" y="135" class="logo-text logo-accent" font-size="18" text-anchor="middle">CGSS</text>
+    
+    <!-- Decorative Lines -->
+    <line x1="60" y1="145" x2="140" y2="145" stroke="#E74C3C" stroke-width="2"/>
+    <line x1="70" y1="152" x2="130" y2="152" stroke="#003DA5" stroke-width="1"/>
+</svg>

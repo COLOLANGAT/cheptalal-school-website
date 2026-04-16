@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
+    <!-- Slide 1: School Campus -->
+    <defs>
+        <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#E0F6FF;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Sky -->
+    <rect width="1200" height="500" fill="url(#gradient1)"/>
+    
+    <!-- Sun -->
+    <circle cx="950" cy="100" r="60" fill="#FFD700"/>
+    
+    <!-- Main Building -->
+    <rect x="100" y="200" width="400" height="200" fill="#B8730F"/>
+    
+    <!-- Roof -->
+    <polygon points="100,200 300,50 500,200" fill="#8B5A00"/>
+    
+    <!-- Windows -->
+    <rect x="150" y="240" width="40" height="40" fill="#87CEEB"/>
+    <rect x="220" y="240" width="40" height="40" fill="#87CEEB"/>
+    <rect x="290" y="240" width="40" height="40" fill="#87CEEB"/>
+    <rect x="360" y="240" width="40" height="40" fill="#87CEEB"/>
+    
+    <rect x="150" y="320" width="40" height="40" fill="#87CEEB"/>
+    <rect x="220" y="320" width="40" height="40" fill="#87CEEB"/>
+    <rect x="290" y="320" width="40" height="40" fill="#87CEEB"/>
+    <rect x="360" y="320" width="40" height="40" fill="#87CEEB"/>
+    
+    <!-- Door -->
+    <rect x="280" y="350" width="40" height="50" fill="#654321"/>
+    
+    <!-- Flag Pole -->
+    <rect x="420" y="120" width="6" height="80" fill="#333333"/>
+    
+    <!-- Flag -->
+    <rect x="426" y="100" width="80" height="50" fill="#003DA5"/>
+    <rect x="426" y="100" width="80" height="25" fill="#FFFFFF"/>
+    <polygon points="426,125 460,100 500,125" fill="#E74C3C"/>
+    
+    <!-- Playground -->
+    <g transform="translate(700, 280)">
+        <!-- Swing set -->
+        <rect x="0" y="0" width="4" height="100" fill="#666"/>
+        <circle cx="20" cy="100" r="15" fill="#FF6B6B"/>
+        <circle cx="100" cy="100" r="15" fill="#4ECDC4"/>
+        <line x1="0" y1="0" x2="20" y2="100" stroke="#666" stroke-width="2"/>
+        <line x1="100" y1="0" x2="100" y2="100" stroke="#666" stroke-width="2"/>
+        
+        <!-- Slide -->
+        <rect x="150" y="20" width="20" height="80" fill="#666"/>
+        <path d="M 170 20 Q 220 50 180 100" fill="none" stroke="#FF9999" stroke-width="20"/>
+    </g>
+    
+    <!-- Trees -->
+    <g transform="translate(1000, 150)">
+        <rect x="0" y="100" width="30" height="80" fill="#8B4513"/>
+        <circle cx="15" cy="80" r="50" fill="#228B22"/>
+    </g>
+    
+    <!-- Text -->
+    <text x="600" y="450" font-family="Arial" font-size="32" font-weight="bold" text-anchor="middle" fill="#003DA5">
+        Welcome to Our School Campus
+    </text>
+</svg>

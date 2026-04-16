@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
+    <!-- Slide 3: Activities & Sports -->
+    <defs>
+        <linearGradient id="gradient3" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#FFF3E0;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#FFE0B2;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="gradient4" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#90EE90;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="1200" height="500" fill="url(#gradient3)"/>
+    
+    <!-- Sports Field -->
+    <rect x="100" y="150" width="900" height="200" fill="url(#gradient4)" stroke="#333" stroke-width="2"/>
+    
+    <!-- Volleyball Net -->
+    <line x1="300" y1="200" x2="300" y2="350" stroke="#333" stroke-width="3"/>
+    <path d="M 280 280 Q 300 300 320 280" fill="none" stroke="#FF6B6B" stroke-width="4"/>
+    <path d="M 285 300 Q 300 315 315 300" fill="none" stroke="#FF6B6B" stroke-width="4"/>
+    
+    <!-- Basketball Court -->
+    <g transform="translate(600, 280)">
+        <rect x="-50" y="-50" width="100" height="100" fill="#FFD700" stroke="#333" stroke-width="2"/>
+        <circle cx="0" cy="0" r="20" fill="none" stroke="#333" stroke-width="2"/>
+        <line x1="-50" y1="0" x2="50" y2="0" stroke="#333" stroke-width="2"/>
+    </g>
+    
+    <!-- Basketball Hoop -->
+    <rect x="700" y="120" width="15" height="60" fill="#333"/>
+    <rect x="715" y="180" width="80" height="4" fill="#333"/>
+    <circle cx="755" cy="184" r="20" fill="none" stroke="#FF9999" stroke-width="4"/>
+    
+    <!-- Students Playing -->
+    <!-- Player 1 -->
+    <circle cx="450" cy="220" r="15" fill="#FFD1DC"/>
+    <ellipse cx="450" cy="250" rx="12" ry="20" fill="#FF69B4"/>
+    
+    <!-- Player 2 -->
+    <circle cx="520" cy="240" r="15" fill="#FFD1DC"/>
+    <ellipse cx="520" cy="270" rx="12" ry="20" fill="#4169E0"/>
+    
+    <!-- Ball -->
+    <circle cx="480" cy="210" r="8" fill="#FF6347"/>
+    
+    <!-- Flag/Banner -->
+    <rect x="50" y="30" width="6" height="120" fill="#333"/>
+    <rect x="56" y="30" width="120" height="60" fill="#003DA5"/>
+    <text x="116" y="65" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#FFFFFF">SPORTS</text>
+    
+    <!-- Text -->
+    <text x="600" y="450" font-family="Arial" font-size="32" font-weight="bold" text-anchor="middle" fill="#003DA5">
+        Sports & Physical Activities
+    </text>
+</svg>

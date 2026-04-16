@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
+    <!-- Slide 4: Events & Celebrations -->
+    <defs>
+        <linearGradient id="gradient5" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#F3E5F5;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#E1BEE7;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="1200" height="500" fill="url(#gradient5)"/>
+    
+    <!-- Stage/Platform -->
+    <rect x="100" y="250" width="1000" height="150" fill="#8B4513" stroke="#333" stroke-width="3"/>
+    <rect x="100" y="240" width="1000" height="20" fill="#FFD700" stroke="#333" stroke-width="2"/>
+    
+    <!-- Spotlight -->
+    <circle cx="300" cy="100" r="60" fill="#FFD700" opacity="0.6"/>
+    <circle cx="900" cy="100" r="60" fill="#FF6B6B" opacity="0.6"/>
+    
+    <!-- Decorations - Balloons -->
+    <circle cx="150" cy="80" r="15" fill="#E74C3C"/>
+    <line x1="157" y1="95" x2="160" y2="200" stroke="#333" stroke-width="1"/>
+    
+    <circle cx="1050" cy="80" r="15" fill="#003DA5"/>
+    <line x1="1043" y1="95" x2="1040" y2="200" stroke="#333" stroke-width="1"/>
+    
+    <circle cx="600" cy="60" r="15" fill="#FFFFFF"/>
+    <line x1="607" y1="75" x2="610" y2="200" stroke="#333" stroke-width="1"/>
+    
+    <!-- Flag/Banner -->
+    <rect x="200" y="150" width="800" height="60" fill="#003DA5" stroke="#E74C3C" stroke-width="3"/>
+    <text x="600" y="190" font-family="Arial" font-size="28" font-weight="bold" text-anchor="middle" fill="#FFFFFF">
+        Annual School Celebration
+    </text>
+    
+    <!-- People on Stage -->
+    <!-- Person 1 -->
+    <circle cx="350" cy="210" r="18" fill="#FFD1DC"/>
+    <ellipse cx="350" cy="245" rx="15" ry="22" fill="#FF69B4"/>
+    <rect x="335" y="267" width="30" height="25" rx="5" fill="#FFB6C1"/>
+    
+    <!-- Person 2 -->
+    <circle cx="600" cy="210" r="18" fill="#FFD1DC"/>
+    <ellipse cx="600" cy="245" rx="15" ry="22" fill="#4169E0"/>
+    <rect x="585" y="267" width="30" height="25" rx="5" fill="#87CEEB"/>
+    
+    <!-- Person 3 -->
+    <circle cx="850" cy="210" r="18" fill="#FFD1DC"/>
+    <ellipse cx="850" cy="245" rx="15" ry="22" fill="#228B22"/>
+    <rect x="835" y="267" width="30" height="25" rx="5" fill="#90EE90"/>
+    
+    <!-- Microphone -->
+    <circle cx="600" cy="230" r="8" fill="#888"/>
+    <rect x="595" y="238" width="10" height="20" fill="#888"/>
+    
+    <!-- Text -->
+    <text x="600" y="450" font-family="Arial" font-size="32" font-weight="bold" text-anchor="middle" fill="#003DA5">
+        School Events & Celebrations
+    </text>
+</svg>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHEPTALAL GIRLS SECONDARY SCHOOL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <img id="schoolLogo" src="assets/placeholder-logo.svg" alt="School Logo" class="logo">
+                <div class="school-name">
+                    <h1>CHEPTALAL</h1>
+                    <p>GIRLS SECONDARY SCHOOL</p>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="pages/about.html" class="nav-link">About</a></li>
+                <li><a href="pages/academics.html" class="nav-link">Academics</a></li>
+                <li><a href="pages/admissions.html" class="nav-link">Admissions</a></li>
+                <li><a href="pages/contact.html" class="nav-link">Contact</a></li>
+                <li><a href="admin/admin.html" class="nav-link admin-link">Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Logo -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="logo-display">
+                <img id="heroLogo" src="assets/placeholder-logo.svg" alt="CHEPTALAL GIRLS SECONDARY SCHOOL" class="hero-logo">
+            </div>
+            <h2>Welcome to</h2>
+            <h1>CHEPTALAL GIRLS SECONDARY SCHOOL</h1>
+            <p>Empowering Girls Through Quality Education</p>
+        </div>
+    </section>
+
+    <!-- Photo Carousel/Slider -->
+    <section class="slider-section">
+        <div class="container">
+            <h2 class="section-title">Photo Gallery</h2>
+            <div class="slider-container">
+                <div class="slider" id="photoSlider">
+                    <!-- Photos loaded dynamically from localStorage -->
+                </div>
+
+                <!-- Navigation arrows -->
+                <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+                <a class="next" onclick="changeSlide(1)">&#10095;</a>
+            </div>
+
+            <!-- Dots for slide navigation -->
+            <div class="dots-container" id="dotsContainer">
+                <!-- Dots generated dynamically from localStorage -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose Us</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Quality Education</h3>
+                    <p>Providing excellent academic programs with experienced educators</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Holistic Development</h3>
+                    <p>Developing students academically, socially, and emotionally</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-book"></i>
+                    <h3>Modern Facilities</h3>
+                    <p>State-of-the-art classrooms and learning resources</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-star"></i>
+                    <h3>Excellence</h3>
+                    <p>Committed to nurturing excellence in all areas of school life</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Info Section -->
+    <section class="info-section">
+        <div class="container">
+            <h2 class="section-title">Quick Information</h2>
+            <div class="info-grid">
+                <div class="info-box">
+                    <h3>Established</h3>
+                    <p id="established">The year 1985</p>
+                </div>
+                <div class="info-box">
+                    <h3>Students</h3>
+                    <p>1100+ Students</p>
+                </div>
+                <div class="info-box">
+                    <h3>Staff</h3>
+                    <p>33+ teachers and 26 Support staff</p>
+                </div>
+                <div class="info-box">
+                    <h3>Facilities</h3>
+                    <p>40+ modern facilities</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Join Us?</h2>
+            <p>Take the first step towards a brighter future</p>
+            <a href="pages/admissions.html" class="cta-button">Apply Now</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About School</h3>
+                    <p>CHEPTALAL GIRLS SECONDARY SCHOOL is dedicated to providing quality education and developing responsible citizens.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="pages/about.html">About Us</a></li>
+                        <li><a href="pages/academics.html">Academics</a></li>
+                        <li><a href="pages/contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p>Email: <i>cheptalalgirls@gmail.com</i></p>
+                    <p>Phone: +254 798698094</p>
+                    <p>Location: Cheptalal, Kenya</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CHEPTALAL GIRLS SECONDARY SCHOOL. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - CHEPTALAL GIRLS SECONDARY SCHOOL</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="page-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <img id="schoolLogo" src="../assets/placeholder-logo.svg" alt="School Logo" class="logo">
+                <div class="school-name">
+                    <h1>CHEPTALAL</h1>
+                    <p>GIRLS SECONDARY SCHOOL</p>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About</a></li>
+                <li><a href="academics.html" class="nav-link">Academics</a></li>
+                <li><a href="admissions.html" class="nav-link">Admissions</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="../admin/admin.html" class="nav-link admin-link">Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Contact Us</h1>
+            <p>Get In Touch With Our School</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="page-content" id="contact">
+        <div class="container">
+            <!-- Contact Information -->
+            <section class="contact-info-section">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Location</h3>
+                        <p>Cheptalal, Kenya</p>
+                        <p class="subtitle">P.O. Box 502-20210, LITEIN</p>
+                    </div>
+
+                    <div class="info-card">
+                        <i class="fas fa-phone"></i>
+                        <h3>Phone</h3>
+                        <p>+254 798698094</p>
+                        <p class="subtitle">Monday - Friday, 8am - 5pm</p>
+                    </div>
+
+                    <div class="info-card">
+                        <i class="fas fa-envelope"></i>
+                        <h3>Email</h3>
+                        <p><a href="mailto:cheptalalgirls@gmail.com">cheptalalgirls@gmail.com</a></p>
+                        <p class="subtitle">cheptalalgirls@gmail.com</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Form and Map -->
+            <section class="contact-form-section">
+                <div class="form-container">
+                    <h2>Send us a Message</h2>
+                    <form class="contact-form" onsubmit="submitContactForm(event)">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="contactName">Your Name *</label>
+                                <input type="text" id="contactName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">Your Email *</label>
+                                <input type="email" id="contactEmail" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="contactPhone">Phone Number</label>
+                                <input type="tel" id="contactPhone">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactSubject">Subject *</label>
+                                <select id="contactSubject" required>
+                                    <option value="">Select Subject</option>
+                                    <option value="admission">Admission Inquiry</option>
+                                    <option value="academic">Academic Information</option>
+                                    <option value="facilities">Facilities Inquiry</option>
+                                    <option value="events">Events Information</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactMessage">Message *</label>
+                            <textarea id="contactMessage" rows="5" placeholder="Please type your message here..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                    <div id="contactFormMessage"></div>
+                </div>
+
+                <!-- Map -->
+                <div class="map-container">
+                    <h2>Visit Us</h2>
+                    <div id="map" class="leaflet-map"></div>
+                </div>
+            </section>
+
+            <!-- Departments -->
+            <section class="departments-section">
+                <h2>School Departments</h2>
+                <div class="departments-grid">
+                    <div class="department-card">
+                        <h3>Academic Affairs</h3>
+                        <p><strong>Email:</strong> academics@cheptalal.edu.ke</p>
+                        <p><strong>Phone:</strong> +254 XXX XXX XXX ext. 101</p>
+                        <p>For academic inquiries and curriculum information</p>
+                    </div>
+
+                    <div class="department-card">
+                        <h3>Admissions Office</h3>
+                        <p><strong>Email:</strong> admissions@cheptalal.edu.ke</p>
+                        <p><strong>Phone:</strong> +254 XXX XXX XXX ext. 102</p>
+                        <p>For admission applications and student recruitment</p>
+                    </div>
+
+                    <div class="department-card">
+                        <h3>Student Affairs</h3>
+                        <p><strong>Email:</strong> students@cheptalal.edu.ke</p>
+                        <p><strong>Phone:</strong> +254 XXX XXX XXX ext. 103</p>
+                        <p>For student welfare and support services</p>
+                    </div>
+
+                    <div class="department-card">
+                        <h3>Finance Office</h3>
+                        <p><strong>Email:</strong> finance@cheptalal.edu.ke</p>
+                        <p><strong>Phone:</strong> +254 XXX XXX XXX ext. 104</p>
+                        <p>For fees payment and financial inquiries</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Office Hours -->
+            <section class="hours-section">
+                <h2>Office Hours</h2>
+                <div class="hours-grid">
+                    <div class="hours-card">
+                        <h3>School Days</h3>
+                        <p><strong>Monday - Friday</strong></p>
+                        <p>7:00 AM - 5:00 PM</p>
+                    </div>
+
+                    <div class="hours-card">
+                        <h3>Weekends</h3>
+                        <p><strong>Saturday - Sunday</strong></p>
+                        <p>By appointment only</p>
+                    </div>
+
+                    <div class="hours-card">
+                        <h3>School Holidays</h3>
+                        <p><strong>Limited Service</strong></p>
+                        <p>Contact via email or phone</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Social Media -->
+            <section class="social-section">
+                <h2>Follow Us</h2>
+                <p>Connect with us on social media for updates and news</p>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/cheptalal.high" class="social-btn facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="social-btn twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="social-btn instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="social-btn youtube">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About School</h3>
+                    <p>CHEPTALAL GIRLS SECONDARY SCHOOL is dedicated to providing quality education and developing responsible citizens.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="academics.html">Academics</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p>Email: cheptalalgirls@gmail.com</p>
+                    <p>Phone: +254 798698094</p>
+                    <p>Location: Cheptalal, Kenya</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CHEPTALAL GIRLS SECONDARY SCHOOL. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="contact.js"></script>
+    <!-- Leaflet Maps (OpenStreetMap) - No API Key Required -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        function initMap() {
+            // Cheptalal, Kenya coordinates
+            const cheptalalCoords = [-0.4764, 35.1231];
+            
+            // Create map
+            const map = L.map('map').setView(cheptalalCoords, 15);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Add marker for school
+            const marker = L.marker(cheptalalCoords, {
+                title: 'CHEPTALAL GIRLS SECONDARY SCHOOL'
+            }).addTo(map);
+            
+            // Add popup
+            marker.bindPopup(
+                '<div style="padding: 10px; text-align: center;"><strong>CHEPTALAL GIRLS SECONDARY SCHOOL</strong><br>Cheptalal, Kenya<br><i class="fas fa-phone"></i> +254 798698094<br><i class="fas fa-envelope"></i> <a href="mailto:cheptalalgirls@gmail.com">cheptalalgirls@gmail.com</a></div>',
+                {maxWidth: 300}
+            ).openPopup();
+        }
+        
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>
