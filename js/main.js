@@ -249,45 +249,71 @@ function renderNotificationPanel() {
     const panelContent = document.getElementById('notificationPanelContent');
     if (!panelContent) return;
 
-    const { unreadApplications, unreadContacts, applications, contacts } = getPendingNotifications();
+    const { applications, contacts } = getPendingNotifications();
     const items = [];
 
-    if (unreadApplications.length > 0) {
-        unreadApplications.forEach(app => {
-            items.push({
-                title: `New registration: ${app.studentName}`,
-                message: `Parent: ${app.parentName} · Phone: ${app.parentPhone}`,
-                extra: `Date: ${app.applicationDate}`
-            });
+    applications.forEach(app => {
+        items.push({
+            title: `Registration: ${app.studentName}`,
+            preview: `Parent: ${app.parentName} · Phone: ${app.parentPhone}`,
+            detail: `Student: ${app.studentName}\nEmail: ${app.email}\nPhone: ${app.parentPhone}\nCurrent Form: ${app.currentForm}\nCurrent School: ${app.currentSchool}\nBoarding: ${app.boarding}\nAchievements: ${app.achievements || 'None'}\nApplication Date: ${app.applicationDate}`,
+            extra: `${app.applicationDate} · ${app.status === 'submitted' ? 'New' : 'Read'}`,
+            statusLabel: app.status === 'submitted' ? 'New' : 'Read'
         });
-    }
+    });
 
-    if (unreadContacts.length > 0) {
-        unreadContacts.forEach(msg => {
-            items.push({
-                title: `New message: ${msg.subject}`,
-                message: `${msg.name} (${msg.email})`,
-                extra: `Received: ${msg.date} ${msg.time}`
-            });
+    contacts.forEach(msg => {
+        items.push({
+            title: `Message: ${msg.subject}`,
+            preview: `${msg.name} (${msg.email})`,
+            detail: `From: ${msg.name}\nEmail: ${msg.email}\nPhone: ${msg.phone}\nSubject: ${msg.subject}\nMessage: ${msg.message}\nReceived: ${msg.date} ${msg.time}`,
+            extra: `${msg.date} ${msg.time} · ${msg.status === 'new' ? 'New' : 'Read'}`,
+            statusLabel: msg.status === 'new' ? 'New' : 'Read'
         });
-    }
+    });
 
     if (items.length === 0) {
-        if (applications.length === 0 && contacts.length === 0) {
-            panelContent.innerHTML = '<p class="notification-empty">No contact messages or registration applications have been submitted yet.</p>';
-        } else {
-            panelContent.innerHTML = '<p class="notification-empty">No new messages. All contact and application notifications are cleared.</p>';
-        }
+        panelContent.innerHTML = '<p class="notification-empty">No contact messages or registration applications have been submitted yet.</p>';
         return;
     }
 
-    panelContent.innerHTML = items.map(item => `
-        <div class="notification-item">
-            <h4>${item.title}</h4>
-            <p>${item.message}</p>
-            <small>${item.extra}</small>
+    panelContent.innerHTML = items.map((item, index) => `
+        <div class="notification-item ${item.statusLabel === 'New' ? 'notification-new' : ''}" data-index="${index}">
+            <button type="button" class="notification-item-summary" data-index="${index}">
+                <div class="notification-item-header">
+                    <h4>${item.title}</h4>
+                    <span class="notification-status">${item.statusLabel}</span>
+                </div>
+                <p class="notification-item-preview">${item.preview}</p>
+                <small>${item.extra}</small>
+            </button>
+            <div class="notification-item-detail hidden">
+                <pre>${item.detail}</pre>
+            </div>
         </div>
     `).join('');
+
+    panelContent.querySelectorAll('.notification-item-summary').forEach(button => {
+        button.addEventListener('click', toggleNotificationDetail);
+    });
+}
+
+function toggleNotificationDetail(event) {
+    const button = event.currentTarget;
+    const item = button.closest('.notification-item');
+    if (!item) return;
+
+    const detail = item.querySelector('.notification-item-detail');
+    if (!detail) return;
+
+    const openDetails = document.querySelectorAll('.notification-item-detail:not(.hidden)');
+    openDetails.forEach(openDetail => {
+        if (openDetail !== detail) {
+            openDetail.classList.add('hidden');
+        }
+    });
+
+    detail.classList.toggle('hidden');
 }
 
 function markNotificationsRead() {
