@@ -23,6 +23,12 @@
                 <li><a href="pages/about.html" class="nav-link">About</a></li>
                 <li><a href="pages/academics.html" class="nav-link">Academics</a></li>
                 <li><a href="pages/admissions.html" class="nav-link">Admissions</a></li>
+                <li>
+                    <button id="notificationButton" class="nav-link notification-button" type="button" aria-label="View notifications">
+                        <i class="fas fa-bell"></i>
+                        <span id="notificationCount" class="notification-badge">0</span>
+                    </button>
+                </li>
                 <li><a href="pages/contact.html" class="nav-link">Contact</a></li>
                 <li><a href="admin/login.html" class="nav-link admin-link">Admin</a></li>
             </ul>
@@ -34,6 +40,16 @@
         </div>
     </nav>
 
+    <div id="notificationPanel" class="notification-panel hidden" aria-hidden="true">
+        <div class="notification-panel-header">
+            <h3>Messages & Applications</h3>
+            <button id="closeNotificationPanel" class="close-notification" aria-label="Close notifications">&times;</button>
+        </div>
+        <div id="notificationPanelContent" class="notification-panel-content">
+            <p class="notification-empty">Loading notifications...</p>
+        </div>
+    </div>
+
     <!-- Hero Section with Logo -->
     <section class="hero" id="home">
         <div class="hero-content">
@@ -43,6 +59,18 @@
             <h2>Welcome to</h2>
             <h1>CHEPTALAL GIRLS SECONDARY SCHOOL</h1>
             <p>Empowering Girls Through Quality Education</p>
+        </div>
+    </section>
+
+    <!-- Latest Event Ticker -->
+    <section class="event-ticker-section">
+        <div class="container">
+            <div class="event-ticker-wrapper">
+                <span class="event-label">Latest Event:</span>
+                <div class="event-ticker">
+                    <div id="latestEventTicker" class="latest-event-text">Loading the latest event...</div>
+                </div>
+            </div>
         </div>
     </section>
 

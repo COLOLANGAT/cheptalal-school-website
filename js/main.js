@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wait a moment for Firebase to fully initialize before loading gallery
     setTimeout(() => {
         initializeGallerySlider();
+        initializeHomeNotifications();
     }, 1000);
 });
 
@@ -217,6 +218,152 @@ function showNotification(message, type = 'info') {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 3000);
+}
+
+function getPendingNotifications() {
+    const applications = JSON.parse(localStorage.getItem('admissionApplications') || '[]');
+    const contacts = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+
+    const unreadApplications = applications.filter(app => app.status === 'submitted');
+    const unreadContacts = contacts.filter(msg => msg.status === 'new');
+
+    return {
+        unreadApplications,
+        unreadContacts,
+        total: unreadApplications.length + unreadContacts.length,
+        applications,
+        contacts
+    };
+}
+
+function updateNotificationBadge() {
+    const badge = document.getElementById('notificationCount');
+    if (!badge) return;
+
+    const { total } = getPendingNotifications();
+    badge.textContent = total > 0 ? total : '0';
+    badge.style.display = total > 0 ? 'inline-flex' : 'none';
+}
+
+function renderNotificationPanel() {
+    const panelContent = document.getElementById('notificationPanelContent');
+    if (!panelContent) return;
+
+    const { unreadApplications, unreadContacts, applications, contacts } = getPendingNotifications();
+    const items = [];
+
+    if (unreadApplications.length > 0) {
+        unreadApplications.forEach(app => {
+            items.push({
+                title: `New registration: ${app.studentName}`,
+                message: `Parent: ${app.parentName} · Phone: ${app.parentPhone}`,
+                extra: `Date: ${app.applicationDate}`
+            });
+        });
+    }
+
+    if (unreadContacts.length > 0) {
+        unreadContacts.forEach(msg => {
+            items.push({
+                title: `New message: ${msg.subject}`,
+                message: `${msg.name} (${msg.email})`,
+                extra: `Received: ${msg.date} ${msg.time}`
+            });
+        });
+    }
+
+    if (items.length === 0) {
+        if (applications.length === 0 && contacts.length === 0) {
+            panelContent.innerHTML = '<p class="notification-empty">No contact messages or registration applications have been submitted yet.</p>';
+        } else {
+            panelContent.innerHTML = '<p class="notification-empty">No new messages. All contact and application notifications are cleared.</p>';
+        }
+        return;
+    }
+
+    panelContent.innerHTML = items.map(item => `
+        <div class="notification-item">
+            <h4>${item.title}</h4>
+            <p>${item.message}</p>
+            <small>${item.extra}</small>
+        </div>
+    `).join('');
+}
+
+function markNotificationsRead() {
+    const applications = JSON.parse(localStorage.getItem('admissionApplications') || '[]');
+    const contacts = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+
+    const updatedApplications = applications.map(app => ({ ...app, status: app.status === 'submitted' ? 'read' : app.status }));
+    const updatedContacts = contacts.map(msg => ({ ...msg, status: msg.status === 'new' ? 'read' : msg.status }));
+
+    localStorage.setItem('admissionApplications', JSON.stringify(updatedApplications));
+    localStorage.setItem('contactMessages', JSON.stringify(updatedContacts));
+}
+
+function openNotificationPanel() {
+    const panel = document.getElementById('notificationPanel');
+    if (!panel) return;
+    renderNotificationPanel();
+    panel.classList.remove('hidden');
+    panel.classList.add('visible');
+    panel.setAttribute('aria-hidden', 'false');
+    markNotificationsRead();
+    updateNotificationBadge();
+}
+
+function closeNotificationPanel() {
+    const panel = document.getElementById('notificationPanel');
+    if (!panel) return;
+    panel.classList.remove('visible');
+    panel.classList.add('hidden');
+    panel.setAttribute('aria-hidden', 'true');
+}
+
+function getLatestEventMessage() {
+    const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+    if (!events.length) {
+        return 'No event has been published yet. Please add latest events in the admin dashboard.';
+    }
+
+    const latestEvent = events
+        .filter(evt => evt.date)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || events[0];
+
+    const dateString = latestEvent.date ? new Date(latestEvent.date).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    }) : '';
+
+    return `${latestEvent.title || 'Latest event'} ${dateString ? ` — ${dateString}` : ''}`.trim();
+}
+
+function updateLatestEventTicker() {
+    const ticker = document.getElementById('latestEventTicker');
+    if (!ticker) return;
+    ticker.textContent = getLatestEventMessage();
+}
+
+function initializeHomeNotifications() {
+    const notificationButton = document.getElementById('notificationButton');
+    const closeButton = document.getElementById('closeNotificationPanel');
+
+    updateNotificationBadge();
+    updateLatestEventTicker();
+
+    if (notificationButton) {
+        notificationButton.addEventListener('click', openNotificationPanel);
+    }
+
+    if (closeButton) {
+        closeButton.addEventListener('click', closeNotificationPanel);
+    }
+
+    window.addEventListener('storage', () => {
+        updateNotificationBadge();
+        updateLatestEventTicker();
+    });
 }
 
 // Add CSS animations
