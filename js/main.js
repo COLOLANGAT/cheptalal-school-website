@@ -378,7 +378,7 @@ function initializeHomeNotifications() {
     updateNotificationBadge();
     updateLatestEventTicker();
 
-    if (notificationButton) {
+    if (notificationButton && notificationButton.tagName === 'BUTTON') {
         notificationButton.addEventListener('click', openNotificationPanel);
     }
 
