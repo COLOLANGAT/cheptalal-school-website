@@ -22,13 +22,17 @@
             config.appId && config.appId !== 'APP_ID';
     }
 
+    // Mark Firebase as ready
+    window.firebaseReady = false;
+
     // Initialize Firebase
     try {
         if (!isFirebaseConfigured(firebaseConfig)) {
             console.warn('Firebase is not configured. Please replace the placeholder values in js/firebase-init.js with your Firebase project credentials.');
         } else if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
-            console.log('Firebase initialized');
+            window.firebaseReady = true;
+            console.log('✓ Firebase initialized successfully', firebaseConfig.projectId);
         }
     } catch (err) {
         console.warn('Firebase initialization error:', err);
@@ -38,17 +42,29 @@
 
     window.savePhotoToFirebase = function (photoData) {
         if (!window.firebase || !isFirebaseConfigured(firebaseConfig)) {
+            console.warn('Firebase not ready for save');
             return Promise.reject(new Error('Firebase is not configured or not loaded'));
         }
-        return dbRef().push(photoData);
+        console.log('Saving to Firebase:', photoData);
+        return dbRef().push(photoData).then(ref => {
+            console.log('Photo saved to Firebase:', ref.key);
+            return ref;
+        });
     };
 
     window.onGalleryUpdate = function (callback) {
-        if (!window.firebase || !isFirebaseConfigured(firebaseConfig)) return;
+        if (!window.firebase || !isFirebaseConfigured(firebaseConfig)) {
+            console.warn('Firebase not ready for gallery update listener');
+            return;
+        }
+        console.log('Attaching Firebase gallery listener...');
         dbRef().on('value', snapshot => {
             const val = snapshot.val() || {};
             const arr = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+            console.log('Firebase gallery updated with', arr.length, 'photos');
             callback(arr);
+        }, (err) => {
+            console.error('Firebase gallery listener error:', err);
         });
     };
 })();

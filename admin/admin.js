@@ -140,7 +140,14 @@ function uploadPhotos() {
                         caption: caption || 'School Photo',
                         date: new Date().toLocaleDateString()
                     };
-                    window.savePhotoToFirebase(fbData).catch(err => console.warn('Firebase save error', err));
+                    console.log('Attempting Firebase save:', fbData);
+                    window.savePhotoToFirebase(fbData).then(() => {
+                        console.log('✓ Photo saved to Firebase successfully');
+                    }).catch(err => {
+                        console.warn('✗ Firebase save error:', err.message);
+                    });
+                } else {
+                    console.warn('Firebase save function not available');
                 }
 
                 if (uploadedCount === files.length) {

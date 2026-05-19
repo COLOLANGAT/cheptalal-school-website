@@ -78,9 +78,18 @@ function initializeGallerySlider() {
         dotsContainer.innerHTML = '';
 
         const renderSlides = (photos) => {
+            if (!photos || photos.length === 0) {
+                console.log('No photos provided, using fallback');
+                photos = [
+                    { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg' },
+                    { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.21 AM.jpeg' }
+                ];
+            }
+
             photoSlider.innerHTML = '';
             dotsContainer.innerHTML = '';
 
+            console.log('Rendering', photos.length, 'slides');
             photos.forEach((photo, index) => {
                 const slide = document.createElement('div');
                 slide.className = 'slide fade';
@@ -102,20 +111,24 @@ function initializeGallerySlider() {
 
         // If Firebase is available, use realtime gallery updates
         if (window.onGalleryUpdate) {
+            console.log('Firebase listener available, loading gallery from Firebase...');
             window.onGalleryUpdate((photos) => {
-                if (!photos || photos.length === 0) {
-                    // Fallback to hard-coded if no photos
+                console.log('Gallery callback received with', photos.length, 'photos');
+                if (photos && photos.length > 0) {
+                    console.log('Using Firebase photos');
+                    renderSlides(photos);
+                } else {
+                    console.log('No Firebase photos, using fallback');
                     renderSlides([
                         { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg' },
                         { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.21 AM.jpeg' }
                     ]);
-                    return;
                 }
-                renderSlides(photos);
             });
             return;
         }
 
+        console.log('Firebase not available, using fallback hard-coded photos');
         // Fallback: Hard-coded school photos
         renderSlides([
             { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg', alt: 'School Campus Photo 1' },
@@ -126,7 +139,10 @@ function initializeGallerySlider() {
 
 // Initialize slider on page load
 document.addEventListener('DOMContentLoaded', () => {
-    initializeGallerySlider();
+    // Wait a moment for Firebase to fully initialize before loading gallery
+    setTimeout(() => {
+        initializeGallerySlider();
+    }, 1000);
 });
 
 // Scroll Animation for Elements
