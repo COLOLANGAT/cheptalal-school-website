@@ -17,8 +17,8 @@ function showTab(tabName, event) {
     // Update menu items
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => item.classList.remove('active'));
-    if (event && event.target) {
-        event.target.classList.add('active');
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
     }
 
     // Load data if needed
