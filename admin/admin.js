@@ -141,13 +141,24 @@ function uploadPhotos() {
                         date: new Date().toLocaleDateString()
                     };
                     console.log('Attempting Firebase save:', fbData);
-                    window.savePhotoToFirebase(fbData).then(() => {
+                    // try saving to Firebase and handle failures by queuing locally
+                    try {
+                        await window.savePhotoToFirebase(fbData);
                         console.log('✓ Photo saved to Firebase successfully');
-                    }).catch(err => {
+                    } catch (err) {
                         console.warn('✗ Firebase save error:', err.message);
-                    });
+                        // queue pending firebase save so admin can retry later
+                        const pending = JSON.parse(localStorage.getItem('pendingFirebaseUploads') || '[]');
+                        pending.push(fbData);
+                        localStorage.setItem('pendingFirebaseUploads', JSON.stringify(pending));
+                        console.warn('Saved to pendingFirebaseUploads for retry later');
+                    }
                 } else {
                     console.warn('Firebase save function not available');
+                    // also queue for later
+                    const pending = JSON.parse(localStorage.getItem('pendingFirebaseUploads') || '[]');
+                    pending.push({ image: data.secure_url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() });
+                    localStorage.setItem('pendingFirebaseUploads', JSON.stringify(pending));
                 }
 
                 if (uploadedCount === files.length) {
@@ -379,6 +390,32 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('location').value = info.location || '';
         document.getElementById('about').value = info.about || '';
     }
+    // Attempt to flush any pending Firebase uploads queued earlier
+    (async function flushPendingUploads() {
+        try {
+            const pending = JSON.parse(localStorage.getItem('pendingFirebaseUploads') || '[]');
+            if (!pending.length) return;
+            if (!window.savePhotoToFirebase) return;
+            console.log('Flushing', pending.length, 'pending Firebase uploads');
+            const remaining = [];
+            for (let p of pending) {
+                try {
+                    await window.savePhotoToFirebase(p);
+                    console.log('Flushed upload to Firebase:', p.image || p.url || '(no-url)');
+                } catch (err) {
+                    console.warn('Failed to flush upload:', err.message);
+                    remaining.push(p);
+                }
+            }
+            if (remaining.length) {
+                localStorage.setItem('pendingFirebaseUploads', JSON.stringify(remaining));
+            } else {
+                localStorage.removeItem('pendingFirebaseUploads');
+            }
+        } catch (e) {
+            console.warn('Error flushing pending uploads:', e.message);
+        }
+    })();
 });
 
 // Drag and drop removed - using direct Cloudinary API
