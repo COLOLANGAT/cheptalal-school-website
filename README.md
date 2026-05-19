@@ -1,6 +1,25 @@
 # cheptalal-school-website
 School website for CHEPTALAL GIRLS SECONDARY SCHOOL
 
+## Local backend setup for breaking news
+This project now includes a Node.js backend for the homepage breaking news banner and admin management panel.
+
+### Run the server
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the server:
+   ```bash
+   npm start
+   ```
+3. Open the site in a browser at `http://localhost:3000`.
+4. Manage breaking news at `http://localhost:3000/admin/breaking-news.html`.
+
+### Admin password
+The admin password is configured by the environment variable `ADMIN_PASSWORD`.
+If not set, the default is `SchoolAdmin2026`.
+
 ## Firebase photo sync setup
 This project uses Firebase Realtime Database to share uploaded gallery images across devices.
 

@@ -1,0 +1,5 @@
+node_modules/
+uploads/breaking-news/*
+!uploads/breaking-news/.gitkeep
+data/*.json
+.env

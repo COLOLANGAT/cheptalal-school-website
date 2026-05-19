@@ -229,6 +229,299 @@ a {
     opacity: 0.9;
 }
 
+.breaking-news-banner {
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #111, #222);
+    color: #fff;
+    border-bottom: 4px solid #e74c3c;
+}
+
+.breaking-news-banner.empty .breaking-news-copy {
+    opacity: 0.65;
+}
+
+.breaking-news-grid {
+    display: grid;
+    grid-template-columns: 70% 30%;
+    gap: 24px;
+    align-items: center;
+}
+
+.breaking-news-image {
+    min-height: 260px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    background: #000;
+}
+
+.breaking-news-image .media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.breaking-news-image .media-item {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.breaking-news-image .media-item img,
+.breaking-news-image .media-item video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* single media fills the area */
+.breaking-news-image.single .media-grid { grid-template-columns: 1fr; }
+
+.breaking-news-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.breaking-news-headline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.breaking-news-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-radius: 999px;
+    background: #e74c3c;
+    color: #fff;
+    animation: blinkBadge 1.6s ease-in-out infinite;
+}
+
+@keyframes blinkBadge {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.65; transform: scale(0.96); }
+}
+
+.breaking-news-banner.sports {
+    background: linear-gradient(135deg, #2a2f4a, #1f2540);
+    border-color: #f39c12;
+}
+
+.breaking-news-banner.sports .breaking-news-tag {
+    background: #f39c12;
+}
+
+.breaking-news-banner.kcse {
+    background: linear-gradient(135deg, #2b2b2b, #1a1a1a);
+    border-color: #d4af37;
+}
+
+.breaking-news-banner.kcse .breaking-news-tag {
+    background: #d4af37;
+    color: #111;
+}
+
+.breaking-news-details {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.breaking-news-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    color: #f1f1f1;
+    font-size: 14px;
+}
+
+.breaking-news-description {
+    font-size: 16px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.breaking-news-placeholder {
+    margin-top: 16px;
+    font-size: 15px;
+    opacity: 0.85;
+}
+
+.admin-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+}
+
+.admin-form {
+    display: grid;
+    gap: 18px;
+}
+
+.admin-form .form-group {
+    display: grid;
+    gap: 8px;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid #dde5ef;
+    background: #f8fafd;
+    color: #232a3a;
+    font-size: 14px;
+}
+
+.admin-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+    margin-top: 18px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf2f8;
+    text-align: left;
+    color: #344054;
+    font-size: 14px;
+}
+
+.admin-table th {
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.admin-thumb {
+    width: 100px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    background: #5e8ae5;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    transform: translateY(-1px);
+    background: #c0392b;
+}
+
+.btn-secondary {
+    background: #8a94a6;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-1px);
+    background: #6f7a8a;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: #111;
+}
+
+.btn-warning:hover {
+    transform: translateY(-1px);
+    background: #d68910;
+}
+
+.active-action {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.16);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.breaking-news-banner.general {
+    background: linear-gradient(135deg, #7f1d1d, #2b0202);
+    border-color: #c0392b;
+}
+
+.breaking-news-banner.general .breaking-news-tag {
+    background: #c0392b;
+}
+
+.form-message {
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 960px) {
+    .breaking-news-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Slider Section */
 .slider-section {
     padding: 60px 20px;
@@ -254,7 +547,8 @@ a {
 
 .slider-container {
     position: relative;
-    max-width: 800px;
+    width: 90%;
+    max-width: 1100px;
     margin: 0 auto 30px;
     background: var(--white);
     border-radius: 10px;
@@ -265,13 +559,22 @@ a {
 .slider {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 420px;
 }
 
 .slide {
-    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.slide.active {
+    opacity: 1;
+    z-index: 2;
 }
 
 .slide img {
@@ -279,6 +582,7 @@ a {
     height: 100%;
     object-fit: contain;
     background: var(--white);
+    display: block;
 }
 
 .fade {

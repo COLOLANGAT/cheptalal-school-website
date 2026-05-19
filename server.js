@@ -56,6 +56,13 @@ function createId() {
   return crypto.randomBytes(16).toString('hex');
 }
 
+function normalizeItem(item, currentId) {
+  if (!item.status) {
+    item.status = item.id === currentId ? 'active' : 'draft';
+  }
+  return item;
+}
+
 function requireAdmin(req, res, next) {
   const auth = req.headers.authorization || '';
   if (!auth.startsWith('Bearer ')) {
@@ -88,21 +95,23 @@ app.post('/api/admin/login', async (req, res) => {
 app.get('/api/breaking-news/latest', async (req, res) => {
   await ensureStorage();
   const data = await loadData();
-  const item = data.items.find(item => item.id === data.currentId) || data.items[0] || null;
-  res.json({ item });
+  const item = data.currentId ? data.items.find(item => item.id === data.currentId) : null;
+  res.json({ item: item ? normalizeItem(item, data.currentId) : null });
 });
 
 app.get('/api/breaking-news', async (req, res) => {
   await ensureStorage();
   const data = await loadData();
-  const sorted = [...data.items].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sorted = [...data.items]
+    .map(item => normalizeItem(item, data.currentId))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
   res.json({ items: sorted, currentId: data.currentId });
 });
 
 app.post('/api/breaking-news', requireAdmin, upload.single('photo'), async (req, res) => {
   await ensureStorage();
 
-  const { title, date, type, level, uniform, description } = req.body;
+  const { title, date, type, level, uniform, description, action } = req.body;
   if (!title || !date || !type || !level || !uniform || !description) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
@@ -112,22 +121,34 @@ app.post('/api/breaking-news', requireAdmin, upload.single('photo'), async (req,
   }
 
   const data = await loadData();
+  const normalizedType = type.toLowerCase() === 'kcse' ? 'kcse' : type.toLowerCase() === 'general' ? 'general' : 'sports';
+  const publishAction = action === 'draft' ? 'draft' : 'publish';
   const item = {
     id: createId(),
     title,
     date,
-    type: type.toLowerCase() === 'kcse' ? 'kcse' : 'sports',
+    type: normalizedType,
     level,
     uniform,
     description,
+    status: publishAction === 'draft' ? 'draft' : 'active',
     imageUrl: `/uploads/breaking-news/${req.file.filename}`,
     createdAt: new Date().toISOString()
   };
 
-  data.items.unshift(item);
-  data.currentId = item.id;
-  await saveData(data);
+  if (publishAction === 'publish' && data.currentId) {
+    const currentItem = data.items.find(i => i.id === data.currentId);
+    if (currentItem) {
+      currentItem.status = 'archived';
+    }
+  }
 
+  data.items.unshift(item);
+  if (publishAction === 'publish') {
+    data.currentId = item.id;
+  }
+
+  await saveData(data);
   res.json({ item });
 });
 
@@ -138,7 +159,33 @@ app.put('/api/breaking-news/:id/set-home', requireAdmin, async (req, res) => {
   if (!item) {
     return res.status(404).json({ error: 'Item not found.' });
   }
+
+  if (data.currentId && data.currentId !== item.id) {
+    const currentItem = data.items.find(i => i.id === data.currentId);
+    if (currentItem) {
+      currentItem.status = 'archived';
+    }
+  }
+
+  item.status = 'active';
   data.currentId = item.id;
+  await saveData(data);
+  res.json({ item });
+});
+
+app.put('/api/breaking-news/:id/archive', requireAdmin, async (req, res) => {
+  await ensureStorage();
+  const data = await loadData();
+  const item = data.items.find(i => i.id === req.params.id);
+  if (!item) {
+    return res.status(404).json({ error: 'Item not found.' });
+  }
+
+  item.status = 'archived';
+  if (data.currentId === item.id) {
+    data.currentId = null;
+  }
+
   await saveData(data);
   res.json({ item });
 });

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manage Breaking News</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../pages/page-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <img id="schoolLogo" src="../PHOTOS/SCHOOL_LOGO-removebg-preview(1).png" alt="School Logo" class="logo">
+                <div class="school-name">
+                    <h1>CHEPTALAL</h1>
+                    <p>GIRLS SECONDARY SCHOOL</p>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="breaking-news.html" class="nav-link">Breaking News</a></li>
+                <li><a href="../pages/contact.html" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Breaking News Admin Panel</h1>
+            <p>Upload achievements, choose the homepage banner, and manage entries securely.</p>
+        </div>
+    </section>
+
+    <section class="page-content">
+        <div class="container">
+            <div id="adminLoginCard" class="admin-card">
+                <h2>Administrator Login</h2>
+                <form id="adminLoginForm" class="admin-form">
+                    <div class="form-group">
+                        <label for="adminPassword">Admin Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+                    </div>
+                    <button type="submit" class="cta-button">Login</button>
+                    <div id="adminLoginMessage" class="form-message"></div>
+                </form>
+            </div>
+
+            <div id="adminPanel" class="admin-card hidden">
+                <h2>Upload New Breaking News</h2>
+                <form id="breakingNewsForm" class="admin-form">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="breakingTitle">Title</label>
+                            <input type="text" id="breakingTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="breakingDate">Date</label>
+                            <input type="date" id="breakingDate" required>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="breakingType">Content Type</label>
+                            <select id="breakingType" required>
+                                <option value="sports">Sports Achievement</option>
+                                <option value="kcse">KCSE Results Celebration</option>
+                                <option value="general">General Breaking News</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="breakingLocation">Event Location / Level</label>
+                            <input type="text" id="breakingLocation" placeholder="Place of event or competition level" required>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="breakingUniform">Attire Worn / Top Student Names</label>
+                            <input type="text" id="breakingUniform" placeholder="School kit, uniform or top student names" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="breakingPhoto">Celebration Photo(s) / Video(s)</label>
+                            <input type="file" id="breakingPhoto" accept="image/*,video/*" multiple required>
+                            <small>Hold Ctrl (or Cmd) to select multiple files. Supported types: images and mp4/webm videos.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="breakingDescription">Description</label>
+                        <textarea id="breakingDescription" rows="5" placeholder="Describe the announcement and milestone" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" id="publishButton" data-action="publish">Publish to Spotlight</button>
+                        <button type="button" class="btn btn-secondary" id="draftButton" data-action="draft">Save as Draft</button>
+                    </div>
+                    <div id="breakingNewsMessage" class="form-message"></div>
+                </form>
+
+                <h2>Past Achievements</h2>
+                <div id="breakingNewsTable" class="admin-table-wrap"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About School</h3>
+                    <p>CHEPTALAL GIRLS SECONDARY SCHOOL is dedicated to providing quality education and developing responsible citizens.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../index.html">Home</a></li>
+                        <li><a href="../pages/contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p>Email: cheptalalgirls@gmail.com</p>
+                    <p>Phone: +254 798698094</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 CHEPTALAL GIRLS SECONDARY SCHOOL. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="breaking-news-admin.js"></script>
+</body>
+</html>

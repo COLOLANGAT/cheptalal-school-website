@@ -68,7 +68,7 @@ function renderNotificationsPage() {
     }
 
     list.innerHTML = notifications.map(notification => `
-        <div class="notification-item ${notification.status === 'new' ? 'notification-new' : ''}">
+        <div class="notification-item ${notification.status === 'new' ? 'notification-new' : ''}" data-id="${notification.id}">
             <button type="button" class="notification-item-summary" data-id="${notification.id}">
                 <div class="notification-item-header">
                     <h4>${notification.title}</h4>
@@ -79,6 +79,10 @@ function renderNotificationsPage() {
             </button>
             <div class="notification-item-detail hidden">
                 <pre>${notification.detail}</pre>
+                <div class="form-actions" style="margin-top:10px;">
+                    <button class="btn btn-secondary delete-btn" data-id="${notification.id}">Delete</button>
+                    <button class="btn btn-primary reply-btn" data-id="${notification.id}">Reply</button>
+                </div>
             </div>
         </div>
     `).join('');
@@ -109,8 +113,74 @@ function renderNotificationsPage() {
             }
         });
     });
+
+    // attach delete and reply handlers
+    list.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.dataset.id;
+            if (!id) return;
+            if (!confirm('Delete this notification? This action cannot be undone.')) return;
+            deleteNotificationById(id);
+            renderNotificationsPage();
+            if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
+        });
+    });
+
+    list.querySelectorAll('.reply-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.dataset.id;
+            if (!id) return;
+            openReplyComposer(id);
+        });
+    });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
     renderNotificationsPage();
 });
+
+function deleteNotificationById(notificationId) {
+    const applications = JSON.parse(localStorage.getItem('admissionApplications') || '[]');
+    const contacts = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+
+    const updatedApplications = applications.filter(app => `app-${app.id}` !== notificationId);
+    const updatedContacts = contacts.filter(msg => `msg-${msg.id}` !== notificationId);
+
+    localStorage.setItem('admissionApplications', JSON.stringify(updatedApplications));
+    localStorage.setItem('contactMessages', JSON.stringify(updatedContacts));
+}
+
+function openReplyComposer(notificationId) {
+    // find email from storage
+    const applications = JSON.parse(localStorage.getItem('admissionApplications') || '[]');
+    const contacts = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+
+    let email = '';
+    let subject = '';
+    // application id format: app-<id>
+    if (notificationId.startsWith('app-')) {
+        const id = notificationId.replace('app-', '');
+        const app = applications.find(a => String(a.id) === String(id));
+        if (app) {
+            email = app.email || '';
+            subject = `Re: Registration - ${app.studentName}`;
+        }
+    } else if (notificationId.startsWith('msg-')) {
+        const id = notificationId.replace('msg-', '');
+        const msg = contacts.find(m => String(m.id) === String(id));
+        if (msg) {
+            email = msg.email || '';
+            subject = `Re: ${msg.subject || 'Your message to Cheptalal'}`;
+        }
+    }
+
+    if (!email) {
+        alert('No email address available to reply to.');
+        return;
+    }
+
+    const body = encodeURIComponent('\n\n---\nReplying from Cheptalal admin panel');
+    const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${body}`;
+    // open default mail client
+    window.location.href = mailto;
+}
