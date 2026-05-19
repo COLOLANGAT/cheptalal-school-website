@@ -15,77 +15,87 @@ function showTab(tabName, event) {
     }
 
     // Update menu items
-    const menuItems = document.querySelectorAll('.menu-item');
-    menuItems.forEach(item => item.classList.remove('active'));
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-    }
+        const photoInput = document.getElementById('photoInput');
+        const caption = document.getElementById('photoCaption').value;
+        const messageDiv = document.getElementById('photoMessage');
 
-    // Load data if needed
-    if (tabName === 'gallery') {
-        loadGallery();
-    } else if (tabName === 'events') {
-        loadEvents();
-    } else if (tabName === 'dashboard') {
-        updateDashboard();
-    }
-}
+        if (!photoInput.files.length) {
+            showMessage('Please select at least one photo', 'error', messageDiv);
+            return;
+        }
 
-// Logo Preview
-function previewLogo(event) {
-    const file = event.target.files[0];
-    const preview = document.getElementById('logoPreview');
+        const files = Array.from(photoInput.files);
+        let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            preview.innerHTML = `<img src="${e.target.result}" alt="Logo Preview">`;
-            preview.classList.add('has-image');
-        };
-        reader.readAsDataURL(file);
-    }
-}
+        showMessage('Uploading photos...', 'success', messageDiv);
 
-// Upload Logo
-function uploadLogo() {
-    const logoInput = document.getElementById('logoInput');
-    const messageDiv = document.getElementById('logoMessage');
+        // Try local server upload first
+        const serverUrl = window.location.origin;
+        const localEndpoint = serverUrl + '/api/gallery/upload';
 
-    if (!logoInput.files[0]) {
-        showMessage('Please select a logo image', 'error', messageDiv);
-        return;
-    }
+        const form = new FormData();
+        files.forEach(f => form.append('photos', f));
 
-    const file = logoInput.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-        // Store logo in localStorage
-        localStorage.setItem('schoolLogo', e.target.result);
-
-        // Update logo display on main page
-        const logoImages = parent.document.querySelectorAll('#schoolLogo, #heroLogo') || [];
-        logoImages.forEach(img => {
-            img.src = e.target.result;
+        fetch(localEndpoint, {
+            method: 'POST',
+            headers: {
+                // send admin token if available
+                'Authorization': localStorage.getItem('breakingNewsAdminToken') ? 'Bearer ' + localStorage.getItem('breakingNewsAdminToken') : ''
+            },
+            body: form
+        }).then(r => {
+            if (!r.ok) throw new Error('Local upload failed');
+            return r.json();
+        }).then(res => {
+            const uploaded = res.uploaded || [];
+            uploaded.forEach(u => {
+                const photoData = { id: Date.now() + Math.random(), image: u.url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() };
+                photos.push(photoData);
+            });
+            localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+            // Attempt Firebase save for metadata
+            if (window.savePhotoToFirebase) {
+                uploaded.forEach(u => {
+                    window.savePhotoToFirebase({ image: u.url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() }).catch(err => console.warn('Firebase save error:', err.message));
+                });
+            }
+            showMessage(`${uploaded.length} photo(s) uploaded locally!`, 'success', messageDiv);
+            photoInput.value = '';
+            document.getElementById('photoCaption').value = '';
+            loadGallery();
+            updateDashboard();
+        }).catch(err => {
+            console.warn('Local upload failed, falling back to Cloudinary:', err.message);
+            // fallback to Cloudinary as before
+            let uploadedCount = 0;
+            showMessage('Uploading to Cloudinary...', 'success', messageDiv);
+            files.forEach(file => {
+                const fdata = new FormData();
+                fdata.append('file', file);
+                fdata.append('upload_preset', 'school_photoso');
+                fdata.append('cloud_name', 'dwa3uy1bv');
+                fetch('https://api.cloudinary.com/v1_1/dwa3uy1bv/image/upload', { method: 'POST', body: fdata })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.secure_url) {
+                        const photoData = { id: Date.now() + Math.random(), image: data.secure_url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() };
+                        photos.push(photoData);
+                        uploadedCount++;
+                        localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+                        if (window.savePhotoToFirebase) {
+                            window.savePhotoToFirebase({ image: data.secure_url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() }).catch(err => console.warn('Firebase save error:', err.message));
+                        }
+                        if (uploadedCount === files.length) {
+                            showMessage(`${uploadedCount} photo(s) uploaded to Cloudinary`, 'success', messageDiv);
+                            photoInput.value = '';
+                            document.getElementById('photoCaption').value = '';
+                            loadGallery();
+                            updateDashboard();
+                        }
+                    }
+                }).catch(e => showMessage('Error uploading photo: ' + e.message, 'error', messageDiv));
+            });
         });
-
-        showMessage('Logo uploaded successfully! Changes will appear on the homepage.', 'success', messageDiv);
-
-        // Update dashboard
-        localStorage.setItem('logoUploaded', 'true');
-        updateDashboard();
-
-        // Reset form
-        logoInput.value = '';
-        document.getElementById('logoPreview').innerHTML = '<i class="fas fa-image"></i><p>Logo Preview</p>';
-        document.getElementById('logoPreview').classList.remove('has-image');
-    };
-
-    reader.readAsDataURL(file);
-}
-
-// Photo Preview
-function previewPhotos(event) {
     const files = event.target.files;
     // Photos will be previewed on upload
 }

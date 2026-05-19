@@ -31,11 +31,33 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
+// separate storage for gallery uploads
+const GALLERY_DIR = path.join(__dirname, 'uploads', 'gallery');
+const galleryStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, GALLERY_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const name = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
+    cb(null, name);
+  }
+});
+
+const galleryUpload = multer({
+  storage: galleryStorage,
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, allowed.includes(ext));
+  },
+  limits: { fileSize: 10 * 1024 * 1024 }
+});
+
 const activeTokens = new Set();
 
 async function ensureStorage() {
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.mkdir(UPLOAD_DIR, { recursive: true });
+  await fs.mkdir(GALLERY_DIR, { recursive: true });
   try {
     await fs.access(DATA_FILE);
   } catch {
@@ -150,6 +172,37 @@ app.post('/api/breaking-news', requireAdmin, upload.single('photo'), async (req,
 
   await saveData(data);
   res.json({ item });
+});
+
+// Endpoint to upload gallery photos to local uploads/gallery
+app.post('/api/gallery/upload', requireAdmin, galleryUpload.array('photos', 20), async (req, res) => {
+  await ensureStorage();
+  if (!req.files || !req.files.length) {
+    return res.status(400).json({ error: 'No files uploaded' });
+  }
+
+  const uploaded = req.files.map(f => ({ filename: f.filename, url: `/uploads/gallery/${f.filename}` }));
+
+  // Optionally commit uploads to git automatically if AUTO_COMMIT env is true
+  if (process.env.AUTO_COMMIT === 'true') {
+    const { exec } = require('child_process');
+    const msgs = [];
+    try {
+      // Stage new files
+      await new Promise((res, rej) => exec(`git add ${uploaded.map(u => '"' + path.join('uploads','gallery', u.filename) + '"').join(' ')}`, { cwd: __dirname }, (err, stdout, stderr) => err ? rej(stderr || err) : res(stdout)));
+      // Commit
+      await new Promise((res, rej) => exec(`git commit -m "Add gallery uploads" --no-verify`, { cwd: __dirname }, (err, stdout, stderr) => err ? rej(stderr || err) : res(stdout)));
+      // Push
+      await new Promise((res, rej) => exec(`git push origin HEAD:gh-pages`, { cwd: __dirname }, (err, stdout, stderr) => err ? rej(stderr || err) : res(stdout)));
+      msgs.push('Committed and pushed uploads to gh-pages');
+    } catch (err) {
+      console.warn('Auto-commit failed:', err);
+      msgs.push('Auto-commit failed: ' + String(err).slice(0, 200));
+    }
+    return res.json({ uploaded, messages: msgs });
+  }
+
+  res.json({ uploaded });
 });
 
 app.put('/api/breaking-news/:id/set-home', requireAdmin, async (req, res) => {
