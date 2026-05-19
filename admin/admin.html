@@ -119,10 +119,13 @@
                             <label for="photoInput">Select Photos to Upload</label>
                             <input type="file" id="photoInput" accept="image/*" multiple>
                         </div>
+
                         <button onclick="uploadPhotos()" class="btn btn-primary">
-                            <i class="fas fa-cloud-upload-alt"></i> Upload to Cloudinary
+                             <i class="fas fa-cloud-upload-alt"></i> Upload to Cloudinary
                         </button>
-                        <p class="hint">Photos will be stored in cloud and visible to everyone!</p>
+                            <p class="hint">Photos will be stored in cloud and visible to everyone!</p>
+
+                        <p class="hint">Photos will be stored securely on cloudible to everyone!</p>
                     </div>
 
                     <div id="photoMessage"></div>
@@ -225,6 +228,10 @@
         </main>
     </div>
 
+    <!-- Firebase SDKs and init for admin uploads -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="../js/firebase-init.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>

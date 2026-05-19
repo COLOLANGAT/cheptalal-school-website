@@ -85,8 +85,8 @@ function previewPhotos(event) {
     const files = event.target.files;
     // Photos will be previewed on upload
 }
+//Upload Photos to Cloudinary
 
-// Upload Photos via Cloudinary API
 function uploadPhotos() {
     const photoInput = document.getElementById('photoInput');
     const caption = document.getElementById('photoCaption').value;
@@ -127,9 +127,20 @@ function uploadPhotos() {
 
                 // Save after each successful upload
                 localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+                
+                // Also save to Firebase if available (so other devices see the uploads)
+                if (window.savePhotoToFirebase) {
+                    // Firebase will generate its own id; push minimal data
+                    const fbData = {
+                        image: data.secure_url,
+                        caption: caption || 'School Photo',
+                        date: new Date().toLocaleDateString()
+                    };
+                    window.savePhotoToFirebase(fbData).catch(err => console.warn('Firebase save error', err));
+                }
 
                 if (uploadedCount === files.length) {
-                    showMessage(`${uploadedCount} photo(s) uploaded successfully!`, 'success', messageDiv);
+                    showMessage(${uploadedCount} photo(s) uploaded successfully!, 'success', messageDiv);
                     photoInput.value = '';
                     document.getElementById('photoCaption').value = '';
                     loadGallery();
@@ -146,6 +157,31 @@ function uploadPhotos() {
 // Load Gallery
 function loadGallery() {
     const galleryItems = document.getElementById('galleryItems');
+    // If Firebase is available, listen to realtime updates
+    if (window.onGalleryUpdate) {
+        window.onGalleryUpdate((photos) => {
+            if (!photos || photos.length === 0) {
+                galleryItems.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No photos uploaded yet. Upload your first photo above!</p>';
+                return;
+            }
+
+            galleryItems.innerHTML = photos.map(photo => `
+                <div class="gallery-item">
+                    <img src="${photo.image}" alt="${photo.caption}">
+                    <button class="gallery-item-delete" onclick="deletePhoto(${JSON.stringify(photo.id)})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div class="gallery-item-overlay">
+                        <p><strong>${photo.caption}</strong></p>
+                        <p>${photo.date}</p>
+                    </div>
+                </div>
+            `).join('');
+        });
+        return;
+    }
+
+    // Fallback to localStorage when Firebase is not configured
     const photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
 
     if (photos.length === 0) {
@@ -170,6 +206,19 @@ function loadGallery() {
 // Delete Photo
 function deletePhoto(photoId) {
     if (confirm('Are you sure you want to delete this photo?')) {
+        // If Firebase is used, remove from Firebase
+        if (window.firebase && typeof photoId === 'string') {
+            firebase.database().ref('galleryPhotos').child(photoId).remove()
+                .then(() => {
+                    loadGallery();
+                    updateDashboard();
+                    showMessage('Photo deleted successfully!', 'success', document.getElementById('photoMessage'));
+                })
+                .catch(err => showMessage('Error deleting photo: ' + err.message, 'error', document.getElementById('photoMessage')));
+            return;
+        }
+
+        // Fallback: delete from localStorage
         let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
         photos = photos.filter(p => p.id !== photoId);
         localStorage.setItem('galleryPhotos', JSON.stringify(photos));

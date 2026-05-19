@@ -76,31 +76,51 @@ function initializeGallerySlider() {
         // Clear existing slides and dots
         photoSlider.innerHTML = '';
         dotsContainer.innerHTML = '';
-        
-        // Hard-coded school photos
-        const photos = [
+
+        const renderSlides = (photos) => {
+            photoSlider.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            photos.forEach((photo, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide fade';
+                slide.innerHTML = `<img src="${photo.image || photo.src}" alt="${photo.caption || photo.alt || ''}">`;
+                photoSlider.appendChild(slide);
+
+                // Create dot
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                dot.onclick = () => currentSlide(index + 1);
+                dotsContainer.appendChild(dot);
+            });
+
+            // Initialize slider
+            slideIndex = 1;
+            showSlides(slideIndex);
+            autoSlide();
+        };
+
+        // If Firebase is available, use realtime gallery updates
+        if (window.onGalleryUpdate) {
+            window.onGalleryUpdate((photos) => {
+                if (!photos || photos.length === 0) {
+                    // Fallback to hard-coded if no photos
+                    renderSlides([
+                        { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg' },
+                        { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.21 AM.jpeg' }
+                    ]);
+                    return;
+                }
+                renderSlides(photos);
+            });
+            return;
+        }
+
+        // Fallback: Hard-coded school photos
+        renderSlides([
             { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg', alt: 'School Campus Photo 1' },
             { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.21 AM.jpeg', alt: 'School Campus Photo 2' }
-        ];
-        
-        // Create slides from hard-coded photos
-        photos.forEach((photo, index) => {
-            const slide = document.createElement('div');
-            slide.className = 'slide fade';
-            slide.innerHTML = `<img src="${photo.src}" alt="${photo.alt}">`;
-            photoSlider.appendChild(slide);
-            
-            // Create dot
-            const dot = document.createElement('span');
-            dot.className = 'dot';
-            dot.onclick = () => currentSlide(index + 1);
-            dotsContainer.appendChild(dot);
-        });
-        
-        // Initialize slider
-        slideIndex = 1;
-        showSlides(slideIndex);
-        autoSlide();
+        ]);
     }
 }
 
