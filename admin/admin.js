@@ -184,7 +184,7 @@ function loadGallery() {
             galleryItems.innerHTML = photos.map(photo => `
                 <div class="gallery-item">
                     <img src="${photo.image}" alt="${photo.caption}">
-                    <button class="gallery-item-delete" onclick="deletePhoto(${JSON.stringify(photo.id)})">
+                    <button class="gallery-item-delete" onclick="deletePhoto('${photo.id}')">
                         <i class="fas fa-trash"></i>
                     </button>
                     <div class="gallery-item-overlay">
@@ -208,7 +208,7 @@ function loadGallery() {
     galleryItems.innerHTML = photos.map(photo => `
         <div class="gallery-item">
             <img src="${photo.image}" alt="${photo.caption}">
-            <button class="gallery-item-delete" onclick="deletePhoto(${photo.id})">
+            <button class="gallery-item-delete" onclick="deletePhoto('${photo.id}')">
                 <i class="fas fa-trash"></i>
             </button>
             <div class="gallery-item-overlay">
@@ -222,25 +222,32 @@ function loadGallery() {
 // Delete Photo
 function deletePhoto(photoId) {
     if (confirm('Are you sure you want to delete this photo?')) {
-        // If Firebase is used, remove from Firebase
-        if (window.firebase && typeof photoId === 'string') {
-            firebase.database().ref('galleryPhotos').child(photoId).remove()
+        const messageDiv = document.getElementById('photoMessage');
+        
+        // If Firebase deletion function is available, use it
+        if (window.deletePhotoFromFirebase) {
+            console.log('Deleting from Firebase:', photoId);
+            window.deletePhotoFromFirebase(photoId)
                 .then(() => {
                     loadGallery();
                     updateDashboard();
-                    showMessage('Photo deleted successfully!', 'success', document.getElementById('photoMessage'));
+                    showMessage('Photo deleted successfully!', 'success', messageDiv);
                 })
-                .catch(err => showMessage('Error deleting photo: ' + err.message, 'error', document.getElementById('photoMessage')));
+                .catch(err => {
+                    console.error('Delete error:', err);
+                    showMessage('Error deleting photo: ' + err.message, 'error', messageDiv);
+                });
             return;
         }
 
         // Fallback: delete from localStorage
+        console.log('Deleting from localStorage:', photoId);
         let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
         photos = photos.filter(p => p.id !== photoId);
         localStorage.setItem('galleryPhotos', JSON.stringify(photos));
         loadGallery();
         updateDashboard();
-        showMessage('Photo deleted successfully!', 'success', document.getElementById('photoMessage'));
+        showMessage('Photo deleted successfully!', 'success', messageDiv);
     }
 }
 

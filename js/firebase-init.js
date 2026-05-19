@@ -67,4 +67,18 @@
             console.error('Firebase gallery listener error:', err);
         });
     };
+
+    window.deletePhotoFromFirebase = function (photoId) {
+        if (!window.firebase || !isFirebaseConfigured(firebaseConfig)) {
+            console.warn('Firebase not ready for deletion');
+            return Promise.reject(new Error('Firebase is not configured or not loaded'));
+        }
+        console.log('Deleting photo from Firebase:', photoId);
+        return dbRef().child(photoId).remove().then(() => {
+            console.log('✓ Photo deleted from Firebase successfully');
+        }).catch(err => {
+            console.error('✗ Firebase deletion error:', err);
+            throw err;
+        });
+    };
 })();
