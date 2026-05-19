@@ -1,7 +1,9 @@
 // Admin Panel JavaScript
 
 // Tab Switching
-function showTab(tabName) {
+let firebaseGalleryListenerAttached = false;
+
+function showTab(tabName, event) {
     // Hide all tabs
     const tabs = document.querySelectorAll('.tab-content');
     tabs.forEach(tab => tab.classList.remove('active'));
@@ -15,7 +17,9 @@ function showTab(tabName) {
     // Update menu items
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => item.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
 
     // Load data if needed
     if (tabName === 'gallery') {
@@ -140,7 +144,7 @@ function uploadPhotos() {
                 }
 
                 if (uploadedCount === files.length) {
-                    showMessage(${uploadedCount} photo(s) uploaded successfully!, 'success', messageDiv);
+                    showMessage(`${uploadedCount} photo(s) uploaded successfully!`, 'success', messageDiv);
                     photoInput.value = '';
                     document.getElementById('photoCaption').value = '';
                     loadGallery();
@@ -157,14 +161,19 @@ function uploadPhotos() {
 // Load Gallery
 function loadGallery() {
     const galleryItems = document.getElementById('galleryItems');
+    if (!galleryItems) return;
+
     // If Firebase is available, listen to realtime updates
-    if (window.onGalleryUpdate) {
+    if (window.onGalleryUpdate && !firebaseGalleryListenerAttached) {
+        firebaseGalleryListenerAttached = true;
         window.onGalleryUpdate((photos) => {
             if (!photos || photos.length === 0) {
                 galleryItems.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No photos uploaded yet. Upload your first photo above!</p>';
+                document.getElementById('imageCount').textContent = '0';
                 return;
             }
 
+            document.getElementById('imageCount').textContent = photos.length;
             galleryItems.innerHTML = photos.map(photo => `
                 <div class="gallery-item">
                     <img src="${photo.image}" alt="${photo.caption}">
