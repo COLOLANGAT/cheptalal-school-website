@@ -20,6 +20,10 @@ if (hamburger) {
 let slideIndex = 1;
 let slideTimer;
 
+function getSavedGalleryPhotos() {
+    return JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+}
+
 function showSlides(n) {
     const slides = document.querySelectorAll('.slide');
     const dots = document.querySelectorAll('.dot');
@@ -78,16 +82,19 @@ function initializeGallerySlider() {
         dotsContainer.innerHTML = '';
 
         const renderSlides = (photos) => {
-            if (!photos || photos.length === 0) {
-                console.log('No photos provided, using fallback');
-                photos = [
-                    { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg' },
-                    { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.21 AM.jpeg' }
-                ];
-            }
-
             photoSlider.innerHTML = '';
             dotsContainer.innerHTML = '';
+
+            if (!photos || photos.length === 0) {
+                console.log('No gallery photos available');
+                const placeholder = document.createElement('div');
+                placeholder.className = 'slide fade placeholder-slide';
+                placeholder.innerHTML = '<div class="slide-placeholder">No gallery photos are available.</div>';
+                photoSlider.appendChild(placeholder);
+                slideIndex = 1;
+                showSlides(slideIndex);
+                return;
+            }
 
             console.log('Rendering', photos.length, 'slides');
             photos.forEach((photo, index) => {
@@ -110,6 +117,8 @@ function initializeGallerySlider() {
         };
 
         // If Firebase is available, use realtime gallery updates
+        const localPhotos = getSavedGalleryPhotos();
+
         if (window.onGalleryUpdate) {
             console.log('Firebase listener available, loading gallery from Firebase...');
             window.onGalleryUpdate((photos) => {
@@ -117,23 +126,19 @@ function initializeGallerySlider() {
                 if (photos && photos.length > 0) {
                     console.log('Using Firebase photos');
                     renderSlides(photos);
+                } else if (localPhotos && localPhotos.length > 0) {
+                    console.log('No Firebase photos, using saved local gallery photos');
+                    renderSlides(localPhotos);
                 } else {
-                    console.log('No Firebase photos, using fallback');
-                    renderSlides([
-                        { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg' },
-                        { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.21 AM.jpeg' }
-                    ]);
+                    console.log('No gallery photos found');
+                    renderSlides([]);
                 }
             });
             return;
         }
 
-        console.log('Firebase not available, using fallback hard-coded photos');
-        // Fallback: Hard-coded school photos
-        renderSlides([
-            { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg', alt: 'School Campus Photo 1' },
-            { src: 'PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.21 AM.jpeg', alt: 'School Campus Photo 2' }
-        ]);
+        console.log('Firebase not available, loading saved local gallery photos');
+        renderSlides(localPhotos);
     }
 }
 

@@ -23,9 +23,9 @@ function renderBreakingNewsBanner(item) {
     banner.classList.remove('sports', 'kcse', 'general', 'empty');
     banner.classList.add('empty');
     placeholder.textContent = 'No current breaking news is available. Check back soon for the latest school achievement.';
+    placeholder.style.display = 'block';
     detailBox.style.display = 'none';
-    // reset media
-    imageContainer.innerHTML = '<img id="breakingNewsImage" src="PHOTOS/HOME PAGE PHOTOS/WhatsApp Image 2026-04-16 at 11.06.20 AM.jpeg" alt="Breaking news photo">';
+    imageContainer.innerHTML = '<div class="breaking-news-empty">No breaking news image is available.</div>';
     return;
   }
 
