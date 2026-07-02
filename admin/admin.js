@@ -3,6 +3,19 @@
 // Tab Switching
 let firebaseGalleryListenerAttached = false;
 
+function getGalleryPhotos() {
+    return JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+}
+
+function saveGalleryPhotos(photos) {
+    localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+}
+
+function removeLocalGalleryPhoto(photoId) {
+    const photos = getGalleryPhotos().filter(p => String(p.id) !== String(photoId));
+    saveGalleryPhotos(photos);
+}
+
 function showTab(tabName, event) {
     if (event) {
         event.preventDefault();
@@ -172,34 +185,38 @@ function loadGallery() {
     if (!galleryItems) return;
 
     // If Firebase is available, listen to realtime updates
-    if (window.onGalleryUpdate && !firebaseGalleryListenerAttached) {
-        firebaseGalleryListenerAttached = true;
-        window.onGalleryUpdate((photos) => {
-            if (!photos || photos.length === 0) {
-                galleryItems.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No photos uploaded yet. Upload your first photo above!</p>';
-                document.getElementById('imageCount').textContent = '0';
-                return;
-            }
+    if (window.onGalleryUpdate) {
+        if (!firebaseGalleryListenerAttached) {
+            firebaseGalleryListenerAttached = true;
+            window.onGalleryUpdate((photos) => {
+                if (!photos || photos.length === 0) {
+                    galleryItems.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No photos uploaded yet. Upload your first photo above!</p>';
+                    document.getElementById('imageCount').textContent = '0';
+                    saveGalleryPhotos([]);
+                    return;
+                }
 
-            document.getElementById('imageCount').textContent = photos.length;
-            galleryItems.innerHTML = photos.map(photo => `
-                <div class="gallery-item">
-                    <img src="${photo.image}" alt="${photo.caption}">
-                    <button class="gallery-item-delete" onclick="deletePhoto('${photo.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    <div class="gallery-item-overlay">
-                        <p><strong>${photo.caption}</strong></p>
-                        <p>${photo.date}</p>
+                saveGalleryPhotos(photos);
+                document.getElementById('imageCount').textContent = photos.length;
+                galleryItems.innerHTML = photos.map(photo => `
+                    <div class="gallery-item">
+                        <img src="${photo.image}" alt="${photo.caption}">
+                        <button class="gallery-item-delete" onclick="deletePhoto('${photo.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <div class="gallery-item-overlay">
+                            <p><strong>${photo.caption}</strong></p>
+                            <p>${photo.date}</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
-        });
+                `).join('');
+            });
+        }
         return;
     }
 
     // Fallback to localStorage when Firebase is not configured
-    const photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+    const photos = getGalleryPhotos();
 
     if (photos.length === 0) {
         galleryItems.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No photos uploaded yet. Upload your first photo above!</p>';
@@ -234,6 +251,7 @@ function deletePhoto(photoId) {
         console.log('Deleting from Firebase:', photoId);
         window.deletePhotoFromFirebase(photoId)
             .then(() => {
+                removeLocalGalleryPhoto(photoId);
                 loadGallery();
                 updateDashboard();
                 showMessage('Photo deleted successfully!', 'success', messageDiv);
@@ -247,9 +265,7 @@ function deletePhoto(photoId) {
 
     // Fallback: delete from localStorage
     console.log('Deleting from localStorage:', photoId);
-    let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
-    photos = photos.filter(p => String(p.id) !== photoId);
-    localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+    removeLocalGalleryPhoto(photoId);
     loadGallery();
     updateDashboard();
     showMessage('Photo deleted successfully!', 'success', messageDiv);
