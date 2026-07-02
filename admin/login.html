@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - CHEPTALAL GIRLS SECONDARY SCHOOL</title>
+    <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -167,8 +168,9 @@
         // Check if already logged in
         window.addEventListener('load', () => {
             const isLoggedIn = localStorage.getItem('adminLoggedIn');
+            const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
             if (isLoggedIn) {
-                window.location.href = 'admin.html';
+                window.location.href = returnUrl ? returnUrl : 'admin.html';
             }
         });
 
@@ -177,6 +179,7 @@
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('errorMessage');
             const successDiv = document.getElementById('successMessage');
+            const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
 
             // Change this password to something secure!
             const correctPassword = 'admin123'; // CHANGE THIS PASSWORD
@@ -186,7 +189,7 @@
                 successDiv.textContent = 'Login successful! Redirecting...';
                 successDiv.style.display = 'block';
                 setTimeout(() => {
-                    window.location.href = 'admin.html';
+                    window.location.href = returnUrl ? returnUrl : 'admin.html';
                 }, 1000);
             } else {
                 errorDiv.textContent = 'Invalid password. Please try again.';

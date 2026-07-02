@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - CHEPTALAL GIRLS SECONDARY SCHOOL</title>
+    <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -27,7 +28,11 @@
     <nav class="admin-navbar">
         <div class="admin-container">
             <h2>Admin Dashboard</h2>
-            <div style="display: flex; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button type="button" class="notification-icon" onclick="showTab('notifications', event)" aria-label="View notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="adminNotificationBadge" class="notification-badge">0</span>
+                </button>
                 <button onclick="logout()" class="logout-btn" style="padding: 8px 16px; background: #E74C3C; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Website</a>
             </div>
@@ -43,6 +48,7 @@
                 <li><a href="#gallery" class="menu-item" onclick="showTab('gallery', event)">Upload Photos</a></li>
                 <li><a href="#school-info" class="menu-item" onclick="showTab('school-info', event)">School Info</a></li>
                 <li><a href="#events" class="menu-item" onclick="showTab('events', event)">Events</a></li>
+                <li><a href="#notifications" class="menu-item" onclick="showTab('notifications', event)">Notifications</a></li>
                 <li><a href="breaking-news.html" class="menu-item">Breaking News</a></li>
             </ul>
         </aside>
@@ -223,6 +229,19 @@
                     <h2>Upcoming Events</h2>
                     <div id="eventsList">
                         <!-- Events will be displayed here -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="notifications" class="tab-content">
+                <h1>Notifications</h1>
+                <div class="notifications-panel">
+                    <div class="notifications-summary">
+                        <p class="notifications-description">View unread messages and registration applications here.</p>
+                        <button class="btn btn-secondary" onclick="renderAdminNotifications()">Refresh</button>
+                    </div>
+                    <div id="adminNotificationsList" class="notifications-list">
+                        <p class="notification-empty">Loading notifications...</p>
                     </div>
                 </div>
             </section>

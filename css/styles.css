@@ -123,6 +123,30 @@ a {
     background: var(--red-accent);
     border-radius: 50%;
     color: #fff;
+}
+
+.admin-entry-toolbar {
+    width: 100%;
+    background: #002966;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    border-bottom: 2px solid #E74C3C;
+}
+
+.admin-entry-toolbar span {
+    font-size: 14px;
+}
+
+.admin-entry-toolbar .btn {
+    margin: 0;
+}
     font-size: 12px;
     padding: 0 5px;
     position: absolute;

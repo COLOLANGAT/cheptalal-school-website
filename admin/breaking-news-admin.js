@@ -76,6 +76,7 @@ function handleLogin(event) {
   setLoggedIn();
   showMessage('adminLoginMessage', 'Login successful! Loading admin panel.');
   showAdminPanel();
+  startBreakingNewsInactivityTracking();
 }
 
 function clearNewsForm() {
@@ -286,7 +287,30 @@ function initializeAdminPage() {
 
   if (isLoggedIn()) {
     showAdminPanel();
+    startBreakingNewsInactivityTracking();
   }
+}
+
+const BREAKING_NEWS_INACTIVITY_MS = 60 * 1000;
+let breakingNewsInactivityTimer = null;
+
+function resetBreakingNewsInactivityTimer() {
+  if (breakingNewsInactivityTimer) {
+    clearTimeout(breakingNewsInactivityTimer);
+  }
+  breakingNewsInactivityTimer = setTimeout(() => {
+    localStorage.removeItem(adminLoginKey);
+    alert('You have been logged out from Breaking News admin after 1 minute of inactivity.');
+    window.location.reload();
+  }, BREAKING_NEWS_INACTIVITY_MS);
+}
+
+function startBreakingNewsInactivityTracking() {
+  const events = ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+  events.forEach(eventName => {
+    document.addEventListener(eventName, resetBreakingNewsInactivityTimer);
+  });
+  resetBreakingNewsInactivityTimer();
 }
 
 window.addEventListener('DOMContentLoaded', initializeAdminPage);

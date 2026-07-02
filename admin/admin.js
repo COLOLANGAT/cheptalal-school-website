@@ -4,104 +4,91 @@
 let firebaseGalleryListenerAttached = false;
 
 function showTab(tabName, event) {
-    // Hide all tabs
-    const tabs = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => tab.classList.remove('active'));
+    if (event) {
+        event.preventDefault();
+    }
 
-    // Show selected tab
+    const tabs = document.querySelectorAll('.tab-content');
+    const menuItems = document.querySelectorAll('.admin-menu .menu-item');
+
+    tabs.forEach(tab => tab.classList.remove('active'));
+    menuItems.forEach(item => item.classList.remove('active'));
+
     const selectedTab = document.getElementById(tabName);
     if (selectedTab) {
         selectedTab.classList.add('active');
     }
 
-    // Update menu items
-        const photoInput = document.getElementById('photoInput');
-        const caption = document.getElementById('photoCaption').value;
-        const messageDiv = document.getElementById('photoMessage');
-
-        if (!photoInput.files.length) {
-            showMessage('Please select at least one photo', 'error', messageDiv);
-            return;
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    } else {
+        const defaultItem = document.querySelector(`.admin-menu .menu-item[href="#${tabName}"]`);
+        if (defaultItem) {
+            defaultItem.classList.add('active');
         }
+    }
 
-        const files = Array.from(photoInput.files);
-        let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
-
-        showMessage('Uploading photos...', 'success', messageDiv);
-
-        // Try local server upload first
-        const serverUrl = window.location.origin;
-        const localEndpoint = serverUrl + '/api/gallery/upload';
-
-        const form = new FormData();
-        files.forEach(f => form.append('photos', f));
-
-        fetch(localEndpoint, {
-            method: 'POST',
-            headers: {
-                // send admin token if available
-                'Authorization': localStorage.getItem('breakingNewsAdminToken') ? 'Bearer ' + localStorage.getItem('breakingNewsAdminToken') : ''
-            },
-            body: form
-        }).then(r => {
-            if (!r.ok) throw new Error('Local upload failed');
-            return r.json();
-        }).then(res => {
-            const uploaded = res.uploaded || [];
-            uploaded.forEach(u => {
-                const photoData = { id: Date.now() + Math.random(), image: u.url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() };
-                photos.push(photoData);
-            });
-            localStorage.setItem('galleryPhotos', JSON.stringify(photos));
-            // Attempt Firebase save for metadata
-            if (window.savePhotoToFirebase) {
-                uploaded.forEach(u => {
-                    window.savePhotoToFirebase({ image: u.url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() }).catch(err => console.warn('Firebase save error:', err.message));
-                });
-            }
-            showMessage(`${uploaded.length} photo(s) uploaded locally!`, 'success', messageDiv);
-            photoInput.value = '';
-            document.getElementById('photoCaption').value = '';
-            loadGallery();
-            updateDashboard();
-        }).catch(err => {
-            console.warn('Local upload failed, falling back to Cloudinary:', err.message);
-            // fallback to Cloudinary as before
-            let uploadedCount = 0;
-            showMessage('Uploading to Cloudinary...', 'success', messageDiv);
-            files.forEach(file => {
-                const fdata = new FormData();
-                fdata.append('file', file);
-                fdata.append('upload_preset', 'school_photoso');
-                fdata.append('cloud_name', 'dwa3uy1bv');
-                fetch('https://api.cloudinary.com/v1_1/dwa3uy1bv/image/upload', { method: 'POST', body: fdata })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.secure_url) {
-                        const photoData = { id: Date.now() + Math.random(), image: data.secure_url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() };
-                        photos.push(photoData);
-                        uploadedCount++;
-                        localStorage.setItem('galleryPhotos', JSON.stringify(photos));
-                        if (window.savePhotoToFirebase) {
-                            window.savePhotoToFirebase({ image: data.secure_url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() }).catch(err => console.warn('Firebase save error:', err.message));
-                        }
-                        if (uploadedCount === files.length) {
-                            showMessage(`${uploadedCount} photo(s) uploaded to Cloudinary`, 'success', messageDiv);
-                            photoInput.value = '';
-                            document.getElementById('photoCaption').value = '';
-                            loadGallery();
-                            updateDashboard();
-                        }
-                    }
-                }).catch(e => showMessage('Error uploading photo: ' + e.message, 'error', messageDiv));
-            });
-        });
-    const files = event.target.files;
-    // Photos will be previewed on upload
+    if (tabName === 'gallery') {
+        loadGallery();
+    }
+    if (tabName === 'events') {
+        loadEvents();
+    }
+    if (tabName === 'notifications') {
+        renderAdminNotifications();
+    }
 }
-//Upload Photos to Cloudinary
 
-function uploadPhotos() {
+function previewLogo(event) {
+    const file = event.target.files[0];
+    const logoPreview = document.getElementById('logoPreview');
+
+    logoPreview.innerHTML = '<i class="fas fa-image"></i><p>Logo Preview</p>';
+    logoPreview.classList.remove('has-image');
+
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.alt = 'Logo Preview';
+        logoPreview.innerHTML = '';
+        logoPreview.appendChild(img);
+        logoPreview.classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
+}
+
+function uploadLogo() {
+    const logoInput = document.getElementById('logoInput');
+    const messageDiv = document.getElementById('logoMessage');
+
+    if (!logoInput.files.length) {
+        showMessage('Please select a logo image first.', 'error', messageDiv);
+        return;
+    }
+
+    const file = logoInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        localStorage.setItem('schoolLogo', e.target.result);
+        localStorage.setItem('logoUploaded', 'true');
+        showMessage('Logo uploaded successfully!', 'success', messageDiv);
+        document.getElementById('logoStatus').textContent = 'Uploaded';
+        updateDashboard();
+    };
+    reader.onerror = function() {
+        showMessage('Failed to read the logo file. Please try again.', 'error', messageDiv);
+    };
+    reader.readAsDataURL(file);
+}
+
+// Upload Photos to Cloudinary
+
+async function uploadPhotos() {
     const photoInput = document.getElementById('photoInput');
     const caption = document.getElementById('photoCaption').value;
     const messageDiv = document.getElementById('photoMessage');
@@ -111,7 +98,7 @@ function uploadPhotos() {
         return;
     }
 
-    const files = photoInput.files;
+    const files = Array.from(photoInput.files);
     let uploadedCount = 0;
     let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
 
@@ -123,66 +110,59 @@ function uploadPhotos() {
         formData.append('upload_preset', 'school_photoso');
         formData.append('cloud_name', 'dwa3uy1bv');
 
-        fetch('https://api.cloudinary.com/v1_1/dwa3uy1bv/image/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.secure_url) {
-                const photoData = {
-                    id: Date.now() + Math.random(),
-                    image: data.secure_url,
-                    caption: caption || 'School Photo',
-                    date: new Date().toLocaleDateString()
-                };
-                photos.push(photoData);
-                uploadedCount++;
+        try {
+            const response = await fetch('https://api.cloudinary.com/v1_1/dwa3uy1bv/image/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
 
-                // Save after each successful upload
-                localStorage.setItem('galleryPhotos', JSON.stringify(photos));
-                
-                // Also save to Firebase if available (so other devices see the uploads)
-                if (window.savePhotoToFirebase) {
-                    // Firebase will generate its own id; push minimal data
-                    const fbData = {
-                        image: data.secure_url,
-                        caption: caption || 'School Photo',
-                        date: new Date().toLocaleDateString()
-                    };
-                    console.log('Attempting Firebase save:', fbData);
-                    // try saving to Firebase and handle failures by queuing locally
-                    try {
-                        await window.savePhotoToFirebase(fbData);
-                        console.log('✓ Photo saved to Firebase successfully');
-                    } catch (err) {
-                        console.warn('✗ Firebase save error:', err.message);
-                        // queue pending firebase save so admin can retry later
-                        const pending = JSON.parse(localStorage.getItem('pendingFirebaseUploads') || '[]');
-                        pending.push(fbData);
-                        localStorage.setItem('pendingFirebaseUploads', JSON.stringify(pending));
-                        console.warn('Saved to pendingFirebaseUploads for retry later');
-                    }
-                } else {
-                    console.warn('Firebase save function not available');
-                    // also queue for later
+            if (!data.secure_url) {
+                throw new Error(data.error?.message || 'Upload did not return a secure URL.');
+            }
+
+            const photoData = {
+                id: Date.now() + Math.random(),
+                image: data.secure_url,
+                caption: caption || 'School Photo',
+                date: new Date().toLocaleDateString()
+            };
+
+            photos.push(photoData);
+            localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+            uploadedCount++;
+
+            const fbData = {
+                image: data.secure_url,
+                caption: caption || 'School Photo',
+                date: new Date().toLocaleDateString()
+            };
+
+            if (window.savePhotoToFirebase) {
+                try {
+                    await window.savePhotoToFirebase(fbData);
+                } catch (err) {
                     const pending = JSON.parse(localStorage.getItem('pendingFirebaseUploads') || '[]');
-                    pending.push({ image: data.secure_url, caption: caption || 'School Photo', date: new Date().toLocaleDateString() });
+                    pending.push(fbData);
                     localStorage.setItem('pendingFirebaseUploads', JSON.stringify(pending));
                 }
-
-                if (uploadedCount === files.length) {
-                    showMessage(`${uploadedCount} photo(s) uploaded successfully!`, 'success', messageDiv);
-                    photoInput.value = '';
-                    document.getElementById('photoCaption').value = '';
-                    loadGallery();
-                    updateDashboard();
-                }
+            } else {
+                const pending = JSON.parse(localStorage.getItem('pendingFirebaseUploads') || '[]');
+                pending.push(fbData);
+                localStorage.setItem('pendingFirebaseUploads', JSON.stringify(pending));
             }
-        })
-        .catch(error => {
+        } catch (error) {
             showMessage('Error uploading photo: ' + error.message, 'error', messageDiv);
-        });
+            console.error('Photo upload error:', error);
+        }
+    }
+
+    if (uploadedCount > 0) {
+        showMessage(`${uploadedCount} photo(s) uploaded successfully!`, 'success', messageDiv);
+        photoInput.value = '';
+        document.getElementById('photoCaption').value = '';
+        loadGallery();
+        updateDashboard();
     }
 }
 
@@ -242,34 +222,59 @@ function loadGallery() {
 
 // Delete Photo
 function deletePhoto(photoId) {
-    if (confirm('Are you sure you want to delete this photo?')) {
-        const messageDiv = document.getElementById('photoMessage');
-        
-        // If Firebase deletion function is available, use it
-        if (window.deletePhotoFromFirebase) {
-            console.log('Deleting from Firebase:', photoId);
-            window.deletePhotoFromFirebase(photoId)
-                .then(() => {
-                    loadGallery();
-                    updateDashboard();
-                    showMessage('Photo deleted successfully!', 'success', messageDiv);
-                })
-                .catch(err => {
-                    console.error('Delete error:', err);
-                    showMessage('Error deleting photo: ' + err.message, 'error', messageDiv);
-                });
-            return;
-        }
-
-        // Fallback: delete from localStorage
-        console.log('Deleting from localStorage:', photoId);
-        let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
-        photos = photos.filter(p => p.id !== photoId);
-        localStorage.setItem('galleryPhotos', JSON.stringify(photos));
-        loadGallery();
-        updateDashboard();
-        showMessage('Photo deleted successfully!', 'success', messageDiv);
+    const messageDiv = document.getElementById('photoMessage');
+    if (!confirm('Delete this photo permanently? This action cannot be undone.')) {
+        return;
     }
+
+    photoId = String(photoId);
+
+    // If Firebase deletion function is available, use it
+    if (window.deletePhotoFromFirebase) {
+        console.log('Deleting from Firebase:', photoId);
+        window.deletePhotoFromFirebase(photoId)
+            .then(() => {
+                loadGallery();
+                updateDashboard();
+                showMessage('Photo deleted successfully!', 'success', messageDiv);
+            })
+            .catch(err => {
+                console.error('Delete error:', err);
+                showMessage('Error deleting photo: ' + err.message, 'error', messageDiv);
+            });
+        return;
+    }
+
+    // Fallback: delete from localStorage
+    console.log('Deleting from localStorage:', photoId);
+    let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+    photos = photos.filter(p => String(p.id) !== photoId);
+    localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+    loadGallery();
+    updateDashboard();
+    showMessage('Photo deleted successfully!', 'success', messageDiv);
+}
+
+const ADMIN_INACTIVITY_MS = 5 * 60 * 1000;
+let adminInactivityTimer = null;
+
+function resetAdminInactivityTimer() {
+    if (adminInactivityTimer) {
+        clearTimeout(adminInactivityTimer);
+    }
+    adminInactivityTimer = setTimeout(() => {
+        localStorage.removeItem('adminLoggedIn');
+        alert('You have been logged out due to 5 minutes of inactivity.');
+        window.location.href = 'login.html';
+    }, ADMIN_INACTIVITY_MS);
+}
+
+function startAdminInactivityTracking() {
+    const events = ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(eventName => {
+        document.addEventListener(eventName, resetAdminInactivityTimer);
+    });
+    resetAdminInactivityTimer();
 }
 
 // Save School Info
@@ -366,6 +371,194 @@ function updateDashboard() {
     document.getElementById('imageCount').textContent = photos.length;
     document.getElementById('eventCount').textContent = events.length;
     document.getElementById('logoStatus').textContent = logoUploaded ? 'Uploaded' : 'Not Uploaded';
+    updateAdminNotificationBadge();
+}
+
+function getPendingAdminNotifications() {
+    const applications = JSON.parse(localStorage.getItem('admissionApplications') || '[]');
+    const contacts = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+
+    const unreadApplications = applications.filter(app => app.status === 'submitted');
+    const unreadContacts = contacts.filter(msg => msg.status === 'new');
+
+    return {
+        applications,
+        contacts,
+        unreadApplications,
+        unreadContacts,
+        total: unreadApplications.length + unreadContacts.length
+    };
+}
+
+function updateAdminNotificationBadge() {
+    const badge = document.getElementById('adminNotificationBadge');
+    if (!badge) return;
+    const { total } = getPendingAdminNotifications();
+    badge.textContent = total > 0 ? total : '0';
+    badge.style.display = total > 0 ? 'inline-flex' : 'none';
+}
+
+function renderAdminNotifications() {
+    const container = document.getElementById('adminNotificationsList');
+    if (!container) return;
+
+    const { applications, contacts } = getPendingAdminNotifications();
+    const items = [];
+
+    applications.forEach(app => {
+        items.push({
+            id: `app-${app.id}`,
+            title: `Registration: ${app.studentName}`,
+            preview: `Parent: ${app.parentName} · ${app.parentPhone}`,
+            detail: `Student: ${app.studentName}\nEmail: ${app.email}\nPhone: ${app.parentPhone}\nCurrent Form: ${app.currentForm}\nCurrent School: ${app.currentSchool}\nBoarding: ${app.boarding}\nAchievements: ${app.achievements || 'None'}\nApplication Date: ${app.applicationDate}`,
+            status: app.status === 'submitted' ? 'New' : 'Read',
+            timestamp: app.applicationDate || ''
+        });
+    });
+
+    contacts.forEach(msg => {
+        items.push({
+            id: `msg-${msg.id}`,
+            title: `Message: ${msg.subject}`,
+            preview: `${msg.name} (${msg.email})`, 
+            detail: `From: ${msg.name}\nEmail: ${msg.email}\nPhone: ${msg.phone}\nSubject: ${msg.subject}\nMessage: ${msg.message}\nReceived: ${msg.date} ${msg.time}`,
+            status: msg.status === 'new' ? 'New' : 'Read',
+            timestamp: `${msg.date} ${msg.time}`
+        });
+    });
+
+    if (items.length === 0) {
+        container.innerHTML = '<p class="notification-empty">No messages or applications yet.</p>';
+        return;
+    }
+
+    const sorted = items.sort((a, b) => {
+        if (!a.timestamp) return 1;
+        if (!b.timestamp) return -1;
+        return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+
+    container.innerHTML = sorted.map(item => `
+        <div class="notification-item ${item.status === 'New' ? 'notification-new' : ''}" data-id="${item.id}">
+            <button type="button" class="notification-item-summary" data-id="${item.id}">
+                <div class="notification-item-header">
+                    <h4>${item.title}</h4>
+                    <span class="notification-status">${item.status}</span>
+                </div>
+                <p class="notification-item-preview">${item.preview}</p>
+                <small>${item.timestamp}</small>
+            </button>
+            <div class="notification-item-detail hidden">
+                <pre>${item.detail}</pre>
+                <div class="notification-actions">
+                    <button class="btn btn-secondary delete-btn" data-id="${item.id}">Delete</button>
+                    <button class="btn btn-primary reply-btn" data-id="${item.id}">Reply</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.notification-item-summary').forEach(button => {
+        button.addEventListener('click', event => {
+            const item = event.currentTarget.closest('.notification-item');
+            if (!item) return;
+            const detail = item.querySelector('.notification-item-detail');
+            document.querySelectorAll('.notification-item-detail').forEach(other => {
+                if (other !== detail) {
+                    other.classList.add('hidden');
+                }
+            });
+            detail.classList.toggle('hidden');
+            setAdminNotificationRead(event.currentTarget.dataset.id);
+            item.classList.remove('notification-new');
+            const status = item.querySelector('.notification-status');
+            if (status) status.textContent = 'Read';
+            updateAdminNotificationBadge();
+        });
+    });
+
+    container.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', event => {
+            const id = event.currentTarget.dataset.id;
+            if (!id) return;
+            if (!confirm('Delete this notification permanently?')) return;
+            deleteAdminNotification(id);
+            renderAdminNotifications();
+            updateAdminNotificationBadge();
+        });
+    });
+
+    container.querySelectorAll('.reply-btn').forEach(button => {
+        button.addEventListener('click', event => {
+            const id = event.currentTarget.dataset.id;
+            openAdminReplyComposer(id);
+        });
+    });
+}
+
+function setAdminNotificationRead(notificationId) {
+    const applications = JSON.parse(localStorage.getItem('admissionApplications') || '[]');
+    const contacts = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+
+    const updatedApplications = applications.map(app => {
+        if (`app-${app.id}` === notificationId && app.status === 'submitted') {
+            return { ...app, status: 'read' };
+        }
+        return app;
+    });
+
+    const updatedContacts = contacts.map(msg => {
+        if (`msg-${msg.id}` === notificationId && msg.status === 'new') {
+            return { ...msg, status: 'read' };
+        }
+        return msg;
+    });
+
+    localStorage.setItem('admissionApplications', JSON.stringify(updatedApplications));
+    localStorage.setItem('contactMessages', JSON.stringify(updatedContacts));
+}
+
+function deleteAdminNotification(notificationId) {
+    const applications = JSON.parse(localStorage.getItem('admissionApplications') || '[]');
+    const contacts = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+
+    const updatedApplications = applications.filter(app => `app-${app.id}` !== notificationId);
+    const updatedContacts = contacts.filter(msg => `msg-${msg.id}` !== notificationId);
+
+    localStorage.setItem('admissionApplications', JSON.stringify(updatedApplications));
+    localStorage.setItem('contactMessages', JSON.stringify(updatedContacts));
+}
+
+function openAdminReplyComposer(notificationId) {
+    const applications = JSON.parse(localStorage.getItem('admissionApplications') || '[]');
+    const contacts = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+    let email = '';
+    let subject = '';
+
+    if (notificationId.startsWith('app-')) {
+        const id = notificationId.replace('app-', '');
+        const app = applications.find(a => String(a.id) === String(id));
+        if (app) {
+            email = app.email || '';
+            subject = `Re: Registration - ${app.studentName}`;
+        }
+    } else if (notificationId.startsWith('msg-')) {
+        const id = notificationId.replace('msg-', '');
+        const msg = contacts.find(m => String(m.id) === String(id));
+        if (msg) {
+            email = msg.email || '';
+            subject = `Re: ${msg.subject || 'Your message to Cheptalal'}`;
+        }
+    }
+
+    if (!email) {
+        alert('No email address is available to reply to.');
+        return;
+    }
+
+    const body = encodeURIComponent('\n\n---\nReplying from Cheptalal admin panel');
+    const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${body}`;
+    window.location.href = mailto;
 }
 
 // Show Message
@@ -389,6 +582,12 @@ function showMessage(message, type, element) {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     updateDashboard();
+    loadGallery();
+    loadEvents();
+
+    const hash = window.location.hash || '#dashboard';
+    const initialTab = hash.replace('#', '');
+    showTab(initialTab);
 
     // Load school info if exists
     const info = JSON.parse(localStorage.getItem('schoolInfo') || '{}');
@@ -400,6 +599,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('location').value = info.location || '';
         document.getElementById('about').value = info.about || '';
     }
+
+    if (localStorage.getItem('adminLoggedIn') === 'true') {
+        startAdminInactivityTracking();
+    }
+
     // Attempt to flush any pending Firebase uploads queued earlier
     (async function flushPendingUploads() {
         try {

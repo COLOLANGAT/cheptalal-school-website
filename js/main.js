@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wait a moment for Firebase to fully initialize before loading gallery
     setTimeout(() => {
         initializeGallerySlider();
+        setupAdminEntryMode();
         initializeHomeNotifications();
     }, 1000);
 });
@@ -369,6 +370,54 @@ function updateLatestEventTicker() {
     const ticker = document.getElementById('latestEventTicker');
     if (!ticker) return;
     ticker.textContent = getLatestEventMessage();
+}
+
+function isAdminQueryMode() {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get('admin') || params.get('admin-mode');
+    return value === '1' || value === 'true' || value === 'cheptalal';
+}
+
+function setupAdminEntryMode() {
+    if (!isAdminQueryMode()) return;
+
+    const adminToolbar = document.createElement('div');
+    adminToolbar.id = 'adminEntryToolbar';
+    adminToolbar.className = 'admin-entry-toolbar';
+
+    const loggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    const messageEl = document.createElement('span');
+    messageEl.textContent = 'Admin access mode detected.';
+
+    const actionLink = document.createElement('a');
+    actionLink.className = 'btn btn-primary';
+    actionLink.style.padding = '8px 14px';
+    actionLink.style.display = 'inline-flex';
+    actionLink.style.alignItems = 'center';
+    actionLink.style.gap = '8px';
+
+    if (loggedIn) {
+        actionLink.href = 'admin/admin.html';
+        actionLink.textContent = 'Open Admin Dashboard';
+    } else {
+        const target = window.location.href;
+        actionLink.href = `admin/login.html?returnUrl=${encodeURIComponent(target)}`;
+        actionLink.textContent = 'Admin Login';
+    }
+
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'btn btn-secondary';
+    closeButton.textContent = 'Hide';
+    closeButton.style.marginLeft = '10px';
+    closeButton.addEventListener('click', () => {
+        adminToolbar.remove();
+    });
+
+    adminToolbar.appendChild(messageEl);
+    adminToolbar.appendChild(actionLink);
+    adminToolbar.appendChild(closeButton);
+    document.body.prepend(adminToolbar);
 }
 
 function initializeHomeNotifications() {
