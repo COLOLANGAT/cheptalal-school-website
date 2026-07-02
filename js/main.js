@@ -375,7 +375,7 @@ function updateLatestEventTicker() {
 function isAdminQueryMode() {
     const params = new URLSearchParams(window.location.search);
     const value = params.get('admin') || params.get('admin-mode');
-    return value === '1' || value === 'true' || value === 'cheptalal';
+    return value === '1' || value === 'true' || value === 'cheptalal668';
 }
 
 function setupAdminEntryMode() {
