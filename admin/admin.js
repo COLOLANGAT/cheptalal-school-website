@@ -2,6 +2,7 @@
 
 // Tab Switching
 let firebaseGalleryListenerAttached = false;
+let editingEventId = null;
 
 function getGalleryPhotos() {
     return JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
@@ -314,11 +315,12 @@ function saveSchoolInfo(event) {
 async function addEvent(event) {
     event.preventDefault();
     const eventData = {
-        id: Date.now(),
+        id: editingEventId || Date.now(),
         title: document.getElementById('eventTitle').value,
         date: document.getElementById('eventDate').value,
         description: document.getElementById('eventDescription').value,
-        location: document.getElementById('eventLocation').value
+        location: document.getElementById('eventLocation').value,
+        status: 'active'
     };
 
     const eventMessageEl = document.getElementById('eventMessage');
@@ -357,22 +359,38 @@ async function addEvent(event) {
 
     if (token) {
         try {
-            const r = await fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(eventData) });
-            if (!r.ok) throw new Error('Server returned ' + r.status);
-            showMessage('Event added successfully (server).', 'success', eventMessageEl);
+            let res;
+            if (editingEventId) {
+                res = await fetch('/api/events/' + editingEventId, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(eventData) });
+            } else {
+                res = await fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(eventData) });
+            }
+            if (!res.ok) throw new Error('Server returned ' + res.status);
+            showMessage(editingEventId ? 'Event updated successfully (server).' : 'Event added successfully (server).', 'success', eventMessageEl);
             document.querySelector('.event-form').reset();
+            editingEventId = null;
             // refresh admin list from server
             await loadEvents();
             updateDashboard();
             return;
         } catch (err) {
             console.warn('Server save failed, falling back to local', err);
-            await saveLocally();
-            return;
+            // fall through to local save/update
         }
     }
 
-    // Fallback: save locally
+    // Fallback: save locally (create or update)
+    let events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+    if (editingEventId) {
+        events = events.map(e => e.id === editingEventId ? { ...e, ...eventData } : e);
+        localStorage.setItem('schoolEvents', JSON.stringify(events));
+        showMessage('Event updated locally.', 'success', eventMessageEl);
+        editingEventId = null;
+        document.querySelector('.event-form').reset();
+        loadEvents();
+        updateDashboard();
+        return;
+    }
     await saveLocally();
 }
 
@@ -417,8 +435,15 @@ function renderEventsList(eventsList, events) {
                 <p><span class="event-date">${evt.date ? new Date(evt.date).toLocaleDateString() : ''}</span></p>
                 <p>${evt.description || ''}</p>
                 <p><strong>Location:</strong> ${evt.location || ''}</p>
+                ${evt.status === 'archived' ? '<p><em>Status: Archived</em></p>' : ''}
             </div>
             <div class="event-actions">
+                <button class="btn btn-small" onclick="editEvent('${evt.id}')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-small" onclick="archiveEvent('${evt.id}')">
+                    <i class="fas fa-archive"></i> Archive
+                </button>
                 <button class="btn-delete" onclick="deleteEvent('${evt.id}')">
                     <i class="fas fa-trash"></i> Delete
                 </button>
@@ -427,16 +452,75 @@ function renderEventsList(eventsList, events) {
     `).join('');
 }
 
+// Edit Event - load into form
+function editEvent(eventId) {
+    const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+    const ev = events.find(e => String(e.id) === String(eventId));
+    if (!ev) return;
+    editingEventId = ev.id;
+    document.getElementById('eventTitle').value = ev.title || '';
+    document.getElementById('eventDate').value = ev.date || '';
+    document.getElementById('eventDescription').value = ev.description || '';
+    document.getElementById('eventLocation').value = ev.location || '';
+    showMessage('Loaded event for editing. Save to apply changes.', 'success', document.getElementById('eventMessage'));
+}
+
+// Archive Event
+async function archiveEvent(eventId) {
+    if (!confirm('Archive this event? It will be hidden from active lists.')) return;
+    const token = localStorage.getItem('breakingNewsAdminToken');
+    if (token) {
+        try {
+            const res = await fetch('/api/events/' + eventId, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ action: 'archive' }) });
+            if (res.ok) {
+                await loadEvents();
+                updateDashboard();
+                showMessage('Event archived (server).', 'success', document.getElementById('eventMessage'));
+                return;
+            }
+        } catch (err) { console.warn('Archive failed', err); }
+    }
+    // local fallback
+    let events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+    events = events.map(e => e.id === eventId ? { ...e, status: 'archived' } : e);
+    localStorage.setItem('schoolEvents', JSON.stringify(events));
+    loadEvents();
+    updateDashboard();
+    showMessage('Event archived locally.', 'success', document.getElementById('eventMessage'));
+}
+
 // Delete Event
 function deleteEvent(eventId) {
-    if (confirm('Are you sure you want to delete this event?')) {
-        let events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
-        events = events.filter(e => e.id !== eventId);
-        localStorage.setItem('schoolEvents', JSON.stringify(events));
-        loadEvents();
-        updateDashboard();
-        showMessage('Event deleted successfully!', 'success', document.getElementById('eventMessage'));
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    const token = localStorage.getItem('breakingNewsAdminToken');
+    if (token) {
+        fetch('/api/events/' + eventId, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } })
+            .then(r => {
+                if (r.ok) {
+                    showMessage('Event deleted (server).', 'success', document.getElementById('eventMessage'));
+                    loadEvents();
+                    updateDashboard();
+                } else {
+                    throw new Error('Server returned ' + r.status);
+                }
+            })
+            .catch(err => {
+                console.warn('Server delete failed, falling back to local', err);
+                let events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+                events = events.filter(e => e.id !== eventId);
+                localStorage.setItem('schoolEvents', JSON.stringify(events));
+                loadEvents();
+                updateDashboard();
+                showMessage('Event deleted locally.', 'success', document.getElementById('eventMessage'));
+            });
+        return;
     }
+    let events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+    events = events.filter(e => e.id !== eventId);
+    localStorage.setItem('schoolEvents', JSON.stringify(events));
+    loadEvents();
+    updateDashboard();
+    showMessage('Event deleted successfully!', 'success', document.getElementById('eventMessage'));
 }
 
 // Update Dashboard

@@ -51,11 +51,13 @@
     background: linear-gradient(135deg, #003DA5 0%, #002966 100%);
     color: white;
     padding: 20px 0;
-    position: sticky;
+    position: fixed; /* keep sidebar fixed on the left */
+    left: 0;
     top: 70px;
     height: calc(100vh - 70px);
     overflow-y: auto;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 995;
 }
 
 .admin-menu {
@@ -94,6 +96,7 @@
     padding: 30px;
     background: #F8F9FA;
     overflow-y: auto;
+    margin-left: 250px; /* space for fixed sidebar */
 }
 
 .tab-content {

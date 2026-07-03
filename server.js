@@ -163,6 +163,33 @@ app.post('/api/events', requireAdmin, async (req, res) => {
   res.json({ item });
 });
 
+// Edit an event
+app.put('/api/events/:id', requireAdmin, async (req, res) => {
+  await ensureStorage();
+  const data = await loadEventsData();
+  const item = data.items.find(i => i.id === req.params.id);
+  if (!item) return res.status(404).json({ error: 'Event not found' });
+  const { title, date, description, location, action } = req.body;
+  if (title) item.title = title;
+  if (date) item.date = date;
+  if (description) item.description = description;
+  if (location) item.location = location;
+  if (action === 'archive') item.status = 'archived';
+  await saveEventsData(data);
+  res.json({ item });
+});
+
+// Delete an event
+app.delete('/api/events/:id', requireAdmin, async (req, res) => {
+  await ensureStorage();
+  const data = await loadEventsData();
+  const idx = data.items.findIndex(i => i.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Event not found' });
+  const [deleted] = data.items.splice(idx, 1);
+  await saveEventsData(data);
+  res.json({ success: true, deleted });
+});
+
 app.get('/api/breaking-news', async (req, res) => {
   await ensureStorage();
   const data = await loadData();
