@@ -172,7 +172,7 @@ app.get('/api/breaking-news', async (req, res) => {
   res.json({ items: sorted, currentId: data.currentId });
 });
 
-app.post('/api/breaking-news', requireAdmin, upload.single('photo'), async (req, res) => {
+app.post('/api/breaking-news', requireAdmin, upload.array('photos', 10), async (req, res) => {
   await ensureStorage();
 
   const { title, date, type, level, uniform, description, action } = req.body;
@@ -180,8 +180,8 @@ app.post('/api/breaking-news', requireAdmin, upload.single('photo'), async (req,
     return res.status(400).json({ error: 'All fields are required.' });
   }
 
-  if (!req.file) {
-    return res.status(400).json({ error: 'Photo upload is required.' });
+  if (!req.files || !req.files.length) {
+    return res.status(400).json({ error: 'At least one media file is required.' });
   }
 
   const data = await loadData();
@@ -196,7 +196,10 @@ app.post('/api/breaking-news', requireAdmin, upload.single('photo'), async (req,
     uniform,
     description,
     status: publishAction === 'draft' ? 'draft' : 'active',
-    imageUrl: `/uploads/breaking-news/${req.file.filename}`,
+    media: req.files.map(f => ({
+      type: f.mimetype && f.mimetype.startsWith('video') ? 'video' : 'image',
+      url: `/uploads/breaking-news/${f.filename}`
+    })),
     createdAt: new Date().toISOString()
   };
 
@@ -264,6 +267,42 @@ app.put('/api/breaking-news/:id/set-home', requireAdmin, async (req, res) => {
 
   item.status = 'active';
   data.currentId = item.id;
+  await saveData(data);
+  res.json({ item });
+});
+
+// Edit breaking news item (fields + optional media replacement)
+app.put('/api/breaking-news/:id', requireAdmin, upload.array('photos', 10), async (req, res) => {
+  await ensureStorage();
+  const data = await loadData();
+  const item = data.items.find(i => i.id === req.params.id);
+  if (!item) return res.status(404).json({ error: 'Item not found.' });
+
+  const { title, date, type, level, uniform, description, action } = req.body;
+  if (title) item.title = title;
+  if (date) item.date = date;
+  if (type) item.type = type;
+  if (level) item.level = level;
+  if (uniform) item.uniform = uniform;
+  if (description) item.description = description;
+  if (action) item.status = action === 'draft' ? 'draft' : item.status;
+
+  // If new files uploaded, replace media
+  if (req.files && req.files.length) {
+    // remove old files - best effort
+    if (item.media && item.media.length) {
+      for (const m of item.media) {
+        try {
+          const filePath = path.join(__dirname, m.url.replace('/uploads/', 'uploads/'));
+          await fs.unlink(filePath);
+        } catch (err) {
+          // ignore
+        }
+      }
+    }
+    item.media = req.files.map(f => ({ type: f.mimetype && f.mimetype.startsWith('video') ? 'video' : 'image', url: `/uploads/breaking-news/${f.filename}` }));
+  }
+
   await saveData(data);
   res.json({ item });
 });

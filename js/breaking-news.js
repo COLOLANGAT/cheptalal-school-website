@@ -114,6 +114,7 @@ async function fetchLatestBreakingNews() {
       uniform: serverItem.uniform || '',
       description: serverItem.description || '',
       media: serverItem.imageUrl ? [{ type: 'image', url: serverItem.imageUrl }] : [],
+        media: serverItem.media || (serverItem.imageUrl ? [{ type: 'image', url: serverItem.imageUrl }] : []),
       status: serverItem.status || 'active',
       createdAt: serverItem.createdAt || new Date().toISOString()
     };

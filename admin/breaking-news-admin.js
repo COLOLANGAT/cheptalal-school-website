@@ -4,6 +4,7 @@ const adminTokenKey = 'breakingNewsAdminToken';
 const storageKey = 'breakingNewsItems';
 const currentNewsKey = 'breakingNewsCurrentId';
 let currentPublishAction = 'publish';
+let editingId = null;
 
 function setLoggedIn() {
   localStorage.setItem(adminLoginKey, 'true');
@@ -141,6 +142,12 @@ function updatePublishAction(action) {
 
 function loadBreakingNewsItems() {
   const container = document.getElementById('breakingNewsTable');
+  const token = getAdminToken();
+  if (token) {
+    // prefer server data when authenticated
+    loadBreakingNewsItemsFromServer();
+    return;
+  }
   const items = getStoredItems();
   const currentId = getCurrentNewsId();
 
@@ -170,6 +177,7 @@ function loadBreakingNewsItems() {
                 <td>${formatStatus(item)}</td>
           <td>
             <button class="btn btn-primary" data-action="set-home" data-id="${item.id}">Set to Homepage</button>
+            <button class="btn btn-secondary" data-action="edit-item" data-id="${item.id}">Edit</button>
             ${item.status !== 'archived' ? `<button class="btn btn-warning" data-action="archive-item" data-id="${item.id}">Archive</button>` : ''}
             <button class="btn btn-danger" data-action="delete-item" data-id="${item.id}">Delete</button>
           </td>
@@ -190,11 +198,66 @@ function loadBreakingNewsItems() {
   container.querySelectorAll('button[data-action="delete-item"]').forEach(button => {
     button.addEventListener('click', handleDeleteClick);
   });
+
+  container.querySelectorAll('button[data-action="edit-item"]').forEach(button => {
+    button.addEventListener('click', handleEditClick);
+  });
+}
+
+async function loadBreakingNewsItemsFromServer() {
+  const container = document.getElementById('breakingNewsTable');
+  const token = getAdminToken();
+  if (!token) return loadBreakingNewsItems();
+  try {
+    const res = await fetch('/api/breaking-news', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Server error');
+    const json = await res.json();
+    const items = json.items || [];
+    // normalize fields
+    const mapped = items.map(it => ({
+      id: it.id,
+      title: it.title,
+      date: it.date,
+      type: it.type,
+      location: it.level || it.location || '',
+      uniform: it.uniform || '',
+      description: it.description || '',
+      media: it.media || (it.imageUrl ? [{ type: 'image', url: it.imageUrl }] : []),
+      status: it.status || 'draft',
+      createdAt: it.createdAt || ''
+    }));
+    saveStoredItems(mapped);
+    // render using existing renderer
+    const prev = container.innerHTML;
+    loadBreakingNewsItems();
+  } catch (err) {
+    console.warn('Failed to load breaking news from server', err);
+    loadBreakingNewsItems();
+  }
 }
 
 function handleSetHomeClick(event) {
   const itemId = event.currentTarget.dataset.id;
   const items = getStoredItems();
+  const token = getAdminToken();
+  if (token) {
+    fetch(`/api/breaking-news/${itemId}/set-home`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } })
+      .then(r => r.json())
+      .then(j => {
+        // refresh local store from server
+        loadBreakingNewsItemsFromServer();
+      }).catch(() => {
+        // fallback to local
+        items.forEach(item => {
+          if (item.id === itemId) item.status = 'active'; else if (item.status === 'active') item.status = 'archived';
+        });
+        saveStoredItems(items);
+        setCurrentNewsId(itemId);
+        showMessage('breakingNewsMessage', 'Homepage banner updated successfully.');
+        loadBreakingNewsItems();
+      });
+    return;
+  }
   let hasActive = false;
 
   items.forEach(item => {
@@ -216,6 +279,20 @@ function handleSetHomeClick(event) {
 function handleArchiveClick(event) {
   const itemId = event.currentTarget.dataset.id;
   const items = getStoredItems();
+  const token = getAdminToken();
+  if (token) {
+    fetch(`/api/breaking-news/${itemId}/archive`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } })
+      .then(r => r.json())
+      .then(j => loadBreakingNewsItemsFromServer())
+      .catch(() => {
+        items.forEach(item => { if (item.id === itemId) item.status = 'archived'; });
+        if (getCurrentNewsId() === itemId) setCurrentNewsId(null);
+        saveStoredItems(items);
+        showMessage('breakingNewsMessage', 'Achievement archived successfully.');
+        loadBreakingNewsItems();
+      });
+    return;
+  }
 
   items.forEach(item => {
     if (item.id === itemId) {
@@ -237,6 +314,24 @@ function handleDeleteClick(event) {
   if (!window.confirm('Delete this achievement permanently?')) {
     return;
   }
+  const token = getAdminToken();
+  if (token) {
+    fetch(`/api/breaking-news/${itemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } })
+      .then(r => r.json())
+      .then(j => {
+        showMessage('breakingNewsMessage', 'Achievement deleted successfully (server).');
+        loadBreakingNewsItemsFromServer();
+      })
+      .catch(() => {
+        let items = getStoredItems();
+        items = items.filter(item => item.id !== itemId);
+        if (getCurrentNewsId() === itemId) setCurrentNewsId(null);
+        saveStoredItems(items);
+        showMessage('breakingNewsMessage', 'Achievement deleted successfully.');
+        loadBreakingNewsItems();
+      });
+    return;
+  }
 
   let items = getStoredItems();
   items = items.filter(item => item.id !== itemId);
@@ -248,6 +343,43 @@ function handleDeleteClick(event) {
   saveStoredItems(items);
   showMessage('breakingNewsMessage', 'Achievement deleted successfully.');
   loadBreakingNewsItems();
+}
+
+function handleEditClick(event) {
+  const itemId = event.currentTarget.dataset.id;
+  const token = getAdminToken();
+  if (token) {
+    // load from server
+    fetch('/api/breaking-news', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(r => r.json())
+      .then(j => {
+        const items = j.items || [];
+        const item = items.find(i => i.id === itemId);
+        if (!item) return;
+        loadItemIntoForm(item);
+      })
+      .catch(() => {
+        const items = getStoredItems();
+        const item = items.find(i => i.id === itemId);
+        if (item) loadItemIntoForm(item);
+      });
+    return;
+  }
+  const items = getStoredItems();
+  const item = items.find(i => i.id === itemId);
+  if (item) loadItemIntoForm(item);
+}
+
+function loadItemIntoForm(item) {
+  editingId = item.id;
+  document.getElementById('breakingTitle').value = item.title || '';
+  document.getElementById('breakingDate').value = item.date || '';
+  document.getElementById('breakingType').value = item.type || 'sports';
+  document.getElementById('breakingLocation').value = item.location || item.level || '';
+  document.getElementById('breakingUniform').value = item.uniform || '';
+  document.getElementById('breakingDescription').value = item.description || '';
+  updatePublishAction(item.status === 'draft' ? 'draft' : 'publish');
+  showMessage('breakingNewsMessage', 'Loaded item into form for editing. Select new media to replace existing.', false);
 }
 
 function createId() {
@@ -304,7 +436,7 @@ async function publishBreakingNews(action) {
 
   // If we have an admin token, attempt server upload (single photo supported by server)
   const token = getAdminToken();
-  if (token && files.length) {
+  if (token && (files.length || editingId)) {
     const fd = new FormData();
     fd.append('title', title);
     fd.append('date', date);
@@ -313,11 +445,16 @@ async function publishBreakingNews(action) {
     fd.append('uniform', uniform);
     fd.append('description', description);
     fd.append('action', action === 'draft' ? 'draft' : 'publish');
-    // server accepts one file as 'photo' - use the first
-    fd.append('photo', files[0]);
+    // server accepts multiple files as 'photos'
+    files.forEach(f => fd.append('photos', f));
 
     try {
-      const res = await fetch('/api/breaking-news', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+      let res;
+      if (editingId) {
+        res = await fetch('/api/breaking-news/' + editingId, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+      } else {
+        res = await fetch('/api/breaking-news', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+      }
       if (!res.ok) throw new Error('Server returned ' + res.status);
       const json = await res.json();
       // convert server item to local format and persist so admin UI shows consistent state
@@ -331,7 +468,7 @@ async function publishBreakingNews(action) {
           location: serverItem.level || serverItem.location || '',
           uniform: serverItem.uniform || '',
           description: serverItem.description || '',
-          media: serverItem.imageUrl ? [{ type: 'image', url: serverItem.imageUrl }] : [],
+          media: serverItem.media || (serverItem.imageUrl ? [{ type: 'image', url: serverItem.imageUrl }] : []),
           status: serverItem.status || (action === 'draft' ? 'draft' : 'active'),
           createdAt: serverItem.createdAt || new Date().toISOString()
         };
@@ -343,7 +480,8 @@ async function publishBreakingNews(action) {
         saveStoredItems(items);
         showMessage('breakingNewsMessage', action === 'draft' ? 'Saved as draft (server).' : 'Published to spotlight (server).');
         clearNewsForm();
-        loadBreakingNewsItems();
+        editingId = null;
+        loadBreakingNewsItemsFromServer();
         return;
       }
     } catch (err) {
@@ -353,18 +491,28 @@ async function publishBreakingNews(action) {
   }
 
   // Local fallback (existing behaviour)
-  if (action === 'publish') {
-    items.forEach(item => {
-      if (item.status === 'active') item.status = 'archived';
-    });
-    setCurrentNewsId(localItem.id);
+  if (editingId) {
+    // update existing local item
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].id === editingId) {
+        items[i] = { ...items[i], ...localItem, id: editingId };
+      } else if (action === 'publish' && items[i].status === 'active') {
+        items[i].status = 'archived';
+      }
+    }
+    if (action === 'publish') setCurrentNewsId(editingId);
+  } else {
+    if (action === 'publish') {
+      items.forEach(item => { if (item.status === 'active') item.status = 'archived'; });
+      setCurrentNewsId(localItem.id);
+    }
+    items.unshift(localItem);
   }
-
-  items.unshift(localItem);
   saveStoredItems(items);
 
   showMessage('breakingNewsMessage', action === 'draft' ? 'Saved as draft successfully.' : 'Published to spotlight successfully.');
   clearNewsForm();
+  editingId = null;
   loadBreakingNewsItems();
 }
 
