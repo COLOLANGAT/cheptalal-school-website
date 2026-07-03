@@ -28,78 +28,33 @@
             </ul>
             <div class="hamburger">
                 <span></span>
-                    // Set your Google Maps API key here to use Google Maps. Leave empty to use the Leaflet/OpenStreetMap fallback.
-                    const GMAPS_API_KEY = '';
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
 
-                    function initLeafletMap(containerId) {
-                        const cheptalalCoords = [-0.4764, 35.1231];
-                        const map = L.map(containerId).setView(cheptalalCoords, 12);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(map);
-                        L.marker(cheptalalCoords).addTo(map).bindPopup('<strong>CHEPTALAL GIRLS SECONDARY SCHOOL</strong><br>Cheptalal, Kenya').openPopup();
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Contact Us</h1>
+            <p>Get In Touch With Our School</p>
+        </div>
+    </section>
 
-                        // Add surrounding towns (approximate coords)
-                        const bomet = [-0.7775, 35.3700];
-                        const litein = [-0.6672, 35.3720];
-                        L.marker(bomet).addTo(map).bindPopup('<strong>Bomet</strong>');
-                        L.marker(litein).addTo(map).bindPopup('<strong>Litein</strong>');
-                    }
+    <!-- Main Content -->
+    <section class="page-content" id="contact">
+        <div class="container">
+            <!-- Contact Information -->
+            <section class="contact-info-section">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Location</h3>
+                        <p>Cheptalal, Kenya</p>
+                        <p class="subtitle">P.O. Box 502-20210, LITEIN</p>
+                    </div>
 
-                    function loadGoogleMapsScript(key, callbackName) {
-                        return new Promise((resolve, reject) => {
-                            if (!key) return reject(new Error('No API key'));
-                            const existing = document.querySelector('script[data-gmaps]');
-                            if (existing) return resolve();
-                            const s = document.createElement('script');
-                            s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&callback=${callbackName}`;
-                            s.async = true; s.defer = true; s.setAttribute('data-gmaps', '1');
-                            s.onerror = () => reject(new Error('Failed to load Google Maps'));
-                            window[callbackName + '_resolve'] = resolve;
-                            document.head.appendChild(s);
-                        });
-                    }
-
-                    function initGoogleMapForContact() {
-                        const containerId = 'map';
-                        const mapCenter = { lat: -0.4764, lng: 35.1231 };
-                        const map = new google.maps.Map(document.getElementById(containerId), { center: mapCenter, zoom: 12 });
-
-                        const places = [
-                            { title: 'CHEPTALAL GIRLS SECONDARY SCHOOL', query: 'Cheptalal, Kenya', info: '<strong>CHEPTALAL GIRLS SECONDARY SCHOOL</strong><br>Cheptalal, Kenya<br>Phone: +254 798698094' },
-                            { title: 'Bomet', query: 'Bomet, Kenya', info: '<strong>Bomet</strong>' },
-                            { title: 'Litein', query: 'Litein, Kenya', info: '<strong>Litein</strong>' }
-                        ];
-
-                        const geocoder = new google.maps.Geocoder();
-                        places.forEach(p => {
-                            geocoder.geocode({ address: p.query }, (results, status) => {
-                                if (status === 'OK' && results[0]) {
-                                    const pos = results[0].geometry.location;
-                                    const marker = new google.maps.Marker({ position: pos, map, title: p.title });
-                                    const infow = new google.maps.InfoWindow({ content: p.info });
-                                    marker.addListener('click', () => infow.open(map, marker));
-                                }
-                            });
-                        });
-                    }
-
-                    function initMap() {
-                        if (GMAPS_API_KEY && GMAPS_API_KEY.trim()) {
-                            // load Google Maps and initialize
-                            window.initGoogleMapsContact = function() {
-                                initGoogleMapForContact();
-                                if (window.initGoogleMapsContact_resolve) window.initGoogleMapsContact_resolve();
-                            };
-                            // attach resolve handler name to match loader
-                            loadGoogleMapsScript(GMAPS_API_KEY, 'initGoogleMapsContact').catch(() => {
-                                // fallback to Leaflet
-                                initLeafletMap('map');
-                            });
-                        } else {
-                            initLeafletMap('map');
-                        }
-                    }
-
-                    document.addEventListener('DOMContentLoaded', initMap);
                     <div class="info-card">
                         <i class="fas fa-phone"></i>
                         <h3>Phone</h3>
