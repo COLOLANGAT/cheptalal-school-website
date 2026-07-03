@@ -311,7 +311,7 @@ function saveSchoolInfo(event) {
 }
 
 // Add Event
-function addEvent(event) {
+async function addEvent(event) {
     event.preventDefault();
     const eventData = {
         id: Date.now(),
@@ -377,7 +377,7 @@ function addEvent(event) {
 }
 
 // Load Events
-function loadEvents() {
+async function loadEvents() {
     const eventsList = document.getElementById('eventsList');
     const token = localStorage.getItem('breakingNewsAdminToken');
 
