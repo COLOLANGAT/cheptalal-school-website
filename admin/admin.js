@@ -313,7 +313,6 @@ function saveSchoolInfo(event) {
 // Add Event
 function addEvent(event) {
     event.preventDefault();
-
     const eventData = {
         id: Date.now(),
         title: document.getElementById('eventTitle').value,
@@ -322,72 +321,105 @@ function addEvent(event) {
         location: document.getElementById('eventLocation').value
     };
 
-    // If server admin token is available, try to save to server
-    const token = localStorage.getItem('breakingNewsAdminToken');
-    if (token) {
-        fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(eventData) })
-            .then(r => {
-                if (!r.ok) throw new Error('Server returned ' + r.status);
-                return r.json();
-            })
-            .then(() => {
-                showMessage('Event added successfully (server)!', 'success', document.getElementById('eventMessage'));
-                document.querySelector('.event-form').reset();
-                // refresh from server by fetching latest events in loadEvents
-                loadEvents();
-                updateDashboard();
-            })
-            .catch(() => {
-                // fallback to local storage if server fails
-                const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
-                events.push(eventData);
-                localStorage.setItem('schoolEvents', JSON.stringify(events));
-                showMessage('Event added locally (server unreachable).', 'success', document.getElementById('eventMessage'));
-                document.querySelector('.event-form').reset();
-                loadEvents();
-                updateDashboard();
-            });
-        return;
+    const eventMessageEl = document.getElementById('eventMessage');
+
+    async function saveLocally() {
+        const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+        events.push(eventData);
+        localStorage.setItem('schoolEvents', JSON.stringify(events));
+        showMessage('Event added locally.', 'success', eventMessageEl);
+        document.querySelector('.event-form').reset();
+        loadEvents();
+        updateDashboard();
     }
 
-    // Local-only fallback
-    const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
-    events.push(eventData);
-    localStorage.setItem('schoolEvents', JSON.stringify(events));
+    // If server admin token is available, try to save to server
+    let token = localStorage.getItem('breakingNewsAdminToken');
+    if (!token) {
+        // ask admin for password to obtain a token (only when needed)
+        const pw = window.prompt('Enter admin password to save event to server (leave blank to save locally):');
+        if (pw) {
+            try {
+                const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
+                if (res.ok) {
+                    const j = await res.json();
+                    if (j && j.token) {
+                        token = j.token;
+                        localStorage.setItem('breakingNewsAdminToken', token);
+                        showMessage('Authenticated with server. Saving event...', 'success', eventMessageEl);
+                    }
+                }
+            } catch (err) {
+                console.warn('Server login failed', err);
+            }
+        }
+    }
 
-    showMessage('Event added successfully!', 'success', document.getElementById('eventMessage'));
+    if (token) {
+        try {
+            const r = await fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(eventData) });
+            if (!r.ok) throw new Error('Server returned ' + r.status);
+            showMessage('Event added successfully (server).', 'success', eventMessageEl);
+            document.querySelector('.event-form').reset();
+            // refresh admin list from server
+            await loadEvents();
+            updateDashboard();
+            return;
+        } catch (err) {
+            console.warn('Server save failed, falling back to local', err);
+            await saveLocally();
+            return;
+        }
+    }
 
-    // Reset form
-    document.querySelector('.event-form').reset();
-
-    // Reload events
-    loadEvents();
-    updateDashboard();
+    // Fallback: save locally
+    await saveLocally();
 }
 
 // Load Events
 function loadEvents() {
     const eventsList = document.getElementById('eventsList');
-    const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+    const token = localStorage.getItem('breakingNewsAdminToken');
 
+    // If token exists, try to load events from server
+    if (token) {
+        try {
+            const res = await fetch('/api/events', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (res.ok) {
+                const json = await res.json();
+                const events = json.items || [];
+                localStorage.setItem('schoolEvents', JSON.stringify(events));
+                renderEventsList(eventsList, events);
+                return;
+            }
+        } catch (err) {
+            console.warn('Failed to fetch events from server', err);
+            // fallthrough to local
+        }
+    }
+
+    const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+    renderEventsList(eventsList, events);
+}
+
+function renderEventsList(eventsList, events) {
+    if (!eventsList) return;
     // Sort events by date
     events.sort((a, b) => new Date(a.date) - new Date(b.date));
-
     if (events.length === 0) {
         eventsList.innerHTML = '<p style="text-align: center; color: #999;">No events added yet. Create your first event above!</p>';
         return;
     }
-
     eventsList.innerHTML = events.map(evt => `
         <div class="event-card">
             <div class="event-info">
                 <h4>${evt.title}</h4>
-                <p><span class="event-date">${new Date(evt.date).toLocaleDateString()}</span></p>
-                <p>${evt.description}</p>
-                <p><strong>Location:</strong> ${evt.location}</p>
+                <p><span class="event-date">${evt.date ? new Date(evt.date).toLocaleDateString() : ''}</span></p>
+                <p>${evt.description || ''}</p>
+                <p><strong>Location:</strong> ${evt.location || ''}</p>
             </div>
             <div class="event-actions">
-                <button class="btn-delete" onclick="deleteEvent(${evt.id})">
+                <button class="btn-delete" onclick="deleteEvent('${evt.id}')">
                     <i class="fas fa-trash"></i> Delete
                 </button>
             </div>
