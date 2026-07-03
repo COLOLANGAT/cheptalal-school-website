@@ -520,10 +520,12 @@ function initializeAdminPage() {
   const loginForm = document.getElementById('adminLoginForm');
   const publishButton = document.getElementById('publishButton');
   const draftButton = document.getElementById('draftButton');
+  const backBtn = document.getElementById('backToAdminBtn');
 
   loginForm?.addEventListener('submit', handleLogin);
   publishButton?.addEventListener('click', () => publishBreakingNews('publish'));
   draftButton?.addEventListener('click', () => publishBreakingNews('draft'));
+  backBtn?.addEventListener('click', () => { window.location.href = 'admin.html'; });
 
   updatePublishAction('publish');
 
