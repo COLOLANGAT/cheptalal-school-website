@@ -82,8 +82,65 @@ function renderBreakingNewsBanner(item) {
 }
 
 function initBreakingNewsBanner() {
-  const item = getLocalBreakingNewsItem();
-  renderBreakingNewsBanner(item);
+  // Attempt to load from server then fallback to localStorage
+  fetchLatestBreakingNews().then(() => {
+    const item = getLocalBreakingNewsItem();
+    renderBreakingNewsBanner(item);
+  });
+
+  // Poll server periodically for live updates
+  setInterval(fetchLatestBreakingNews, 15000);
+}
+
+async function fetchLatestBreakingNews() {
+  try {
+    const res = await fetch('/api/breaking-news/latest', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Network response was not ok');
+    const json = await res.json();
+    const serverItem = json.item;
+    if (!serverItem) {
+      // no current item on server; ensure local state reflects that
+      // do not overwrite local drafts
+      return;
+    }
+
+    // Map server item to local shape used by rendering
+    const mapped = {
+      id: serverItem.id,
+      title: serverItem.title,
+      date: serverItem.date,
+      type: serverItem.type,
+      location: serverItem.level || serverItem.location || '',
+      uniform: serverItem.uniform || '',
+      description: serverItem.description || '',
+      media: serverItem.imageUrl ? [{ type: 'image', url: serverItem.imageUrl }] : [],
+      status: serverItem.status || 'active',
+      createdAt: serverItem.createdAt || new Date().toISOString()
+    };
+
+    // Compare with local current id
+    const currentId = localStorage.getItem('breakingNewsCurrentId');
+    if (currentId !== mapped.id) {
+      // update local store so other parts of the site using localStorage reflect server
+      const items = JSON.parse(localStorage.getItem('breakingNewsItems') || '[]');
+      // archive any active local items
+      items.forEach(i => { if (i.status === 'active') i.status = 'archived'; });
+      // insert the server item at front if not present
+      const exists = items.find(i => i.id === mapped.id);
+      if (!exists) items.unshift(mapped);
+      else {
+        // update existing
+        for (let i = 0; i < items.length; i++) if (items[i].id === mapped.id) items[i] = mapped;
+      }
+      localStorage.setItem('breakingNewsItems', JSON.stringify(items));
+      localStorage.setItem('breakingNewsCurrentId', mapped.id);
+      // re-render banner immediately
+      renderBreakingNewsBanner(mapped);
+    }
+  } catch (err) {
+    // server unavailable; keep using local storage
+    // console.warn('Could not fetch latest breaking news:', err);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', initBreakingNewsBanner);

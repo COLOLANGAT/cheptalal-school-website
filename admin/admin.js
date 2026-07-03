@@ -322,6 +322,35 @@ function addEvent(event) {
         location: document.getElementById('eventLocation').value
     };
 
+    // If server admin token is available, try to save to server
+    const token = localStorage.getItem('breakingNewsAdminToken');
+    if (token) {
+        fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(eventData) })
+            .then(r => {
+                if (!r.ok) throw new Error('Server returned ' + r.status);
+                return r.json();
+            })
+            .then(() => {
+                showMessage('Event added successfully (server)!', 'success', document.getElementById('eventMessage'));
+                document.querySelector('.event-form').reset();
+                // refresh from server by fetching latest events in loadEvents
+                loadEvents();
+                updateDashboard();
+            })
+            .catch(() => {
+                // fallback to local storage if server fails
+                const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
+                events.push(eventData);
+                localStorage.setItem('schoolEvents', JSON.stringify(events));
+                showMessage('Event added locally (server unreachable).', 'success', document.getElementById('eventMessage'));
+                document.querySelector('.event-form').reset();
+                loadEvents();
+                updateDashboard();
+            });
+        return;
+    }
+
+    // Local-only fallback
     const events = JSON.parse(localStorage.getItem('schoolEvents') || '[]');
     events.push(eventData);
     localStorage.setItem('schoolEvents', JSON.stringify(events));

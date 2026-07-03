@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'breaking-news.json');
+const EVENTS_FILE = path.join(DATA_DIR, 'events.json');
 const UPLOAD_DIR = path.join(__dirname, 'uploads', 'breaking-news');
 
 const storage = multer.diskStorage({
@@ -63,11 +64,25 @@ async function ensureStorage() {
   } catch {
     await fs.writeFile(DATA_FILE, JSON.stringify({ items: [], currentId: null }, null, 2), 'utf8');
   }
+  try {
+    await fs.access(EVENTS_FILE);
+  } catch {
+    await fs.writeFile(EVENTS_FILE, JSON.stringify({ items: [] }, null, 2), 'utf8');
+  }
 }
 
 async function loadData() {
   const raw = await fs.readFile(DATA_FILE, 'utf8');
   return JSON.parse(raw);
+}
+
+async function loadEventsData() {
+  const raw = await fs.readFile(EVENTS_FILE, 'utf8');
+  return JSON.parse(raw);
+}
+
+async function saveEventsData(data) {
+  await fs.writeFile(EVENTS_FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
 async function saveData(data) {
@@ -119,6 +134,33 @@ app.get('/api/breaking-news/latest', async (req, res) => {
   const data = await loadData();
   const item = data.currentId ? data.items.find(item => item.id === data.currentId) : null;
   res.json({ item: item ? normalizeItem(item, data.currentId) : null });
+});
+
+// Events endpoints
+app.get('/api/events/latest', async (req, res) => {
+  await ensureStorage();
+  const data = await loadEventsData();
+  if (!data.items || !data.items.length) return res.json({ item: null });
+  const sorted = [...data.items].sort((a, b) => new Date(b.date) - new Date(a.date));
+  res.json({ item: sorted[0] });
+});
+
+app.get('/api/events', async (req, res) => {
+  await ensureStorage();
+  const data = await loadEventsData();
+  res.json({ items: data.items || [] });
+});
+
+app.post('/api/events', requireAdmin, async (req, res) => {
+  await ensureStorage();
+  const { title, date, description, location } = req.body;
+  if (!title || !date) return res.status(400).json({ error: 'Title and date are required' });
+  const data = await loadEventsData();
+  const item = { id: crypto.randomBytes(12).toString('hex'), title, date, description: description || '', location: location || '', createdAt: new Date().toISOString() };
+  data.items = data.items || [];
+  data.items.push(item);
+  await saveEventsData(data);
+  res.json({ item });
 });
 
 app.get('/api/breaking-news', async (req, res) => {

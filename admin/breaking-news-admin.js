@@ -1,11 +1,20 @@
 const adminPassword = 'admin123';
 const adminLoginKey = 'breakingNewsAdminLoggedIn';
+const adminTokenKey = 'breakingNewsAdminToken';
 const storageKey = 'breakingNewsItems';
 const currentNewsKey = 'breakingNewsCurrentId';
 let currentPublishAction = 'publish';
 
 function setLoggedIn() {
   localStorage.setItem(adminLoginKey, 'true');
+}
+
+function setAdminToken(token) {
+  if (token) localStorage.setItem(adminTokenKey, token);
+}
+
+function getAdminToken() {
+  return localStorage.getItem(adminTokenKey);
 }
 
 function isLoggedIn() {
@@ -67,16 +76,50 @@ function handleLogin(event) {
     showMessage('adminLoginMessage', 'Please enter the admin password.', true);
     return;
   }
-
-  if (password !== adminPassword) {
-    showMessage('adminLoginMessage', 'Invalid password. Please try again.', true);
-    return;
+  // Try server login first (preferred). Fallback to local password if server unavailable.
+  try {
+    fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) })
+      .then(r => r.json())
+      .then(j => {
+        if (j && j.token) {
+          setAdminToken(j.token);
+          setLoggedIn();
+          showMessage('adminLoginMessage', 'Login successful (server). Loading admin panel.');
+          showAdminPanel();
+          startBreakingNewsInactivityTracking();
+        } else {
+          // server responded but no token -> fall back to local
+          if (password !== adminPassword) {
+            showMessage('adminLoginMessage', 'Invalid password. Please try again.', true);
+            return;
+          }
+          setLoggedIn();
+          showMessage('adminLoginMessage', 'Login successful (local). Loading admin panel.');
+          showAdminPanel();
+          startBreakingNewsInactivityTracking();
+        }
+      })
+      .catch(() => {
+        // server not reachable, fallback to local password
+        if (password !== adminPassword) {
+          showMessage('adminLoginMessage', 'Invalid password. Please try again.', true);
+          return;
+        }
+        setLoggedIn();
+        showMessage('adminLoginMessage', 'Login successful (local). Loading admin panel.');
+        showAdminPanel();
+        startBreakingNewsInactivityTracking();
+      });
+  } catch (err) {
+    if (password !== adminPassword) {
+      showMessage('adminLoginMessage', 'Invalid password. Please try again.', true);
+      return;
+    }
+    setLoggedIn();
+    showMessage('adminLoginMessage', 'Login successful (local). Loading admin panel.');
+    showAdminPanel();
+    startBreakingNewsInactivityTracking();
   }
-
-  setLoggedIn();
-  showMessage('adminLoginMessage', 'Login successful! Loading admin panel.');
-  showAdminPanel();
-  startBreakingNewsInactivityTracking();
 }
 
 function clearNewsForm() {
@@ -246,7 +289,7 @@ async function publishBreakingNews(action) {
   }
 
   const items = getStoredItems();
-  const newItem = {
+  const localItem = {
     id: createId(),
     title,
     date,
@@ -259,14 +302,65 @@ async function publishBreakingNews(action) {
     createdAt: new Date().toISOString()
   };
 
+  // If we have an admin token, attempt server upload (single photo supported by server)
+  const token = getAdminToken();
+  if (token && files.length) {
+    const fd = new FormData();
+    fd.append('title', title);
+    fd.append('date', date);
+    fd.append('type', type);
+    fd.append('level', location);
+    fd.append('uniform', uniform);
+    fd.append('description', description);
+    fd.append('action', action === 'draft' ? 'draft' : 'publish');
+    // server accepts one file as 'photo' - use the first
+    fd.append('photo', files[0]);
+
+    try {
+      const res = await fetch('/api/breaking-news', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      const json = await res.json();
+      // convert server item to local format and persist so admin UI shows consistent state
+      const serverItem = json.item;
+      if (serverItem) {
+        const mapped = {
+          id: serverItem.id,
+          title: serverItem.title,
+          date: serverItem.date,
+          type: serverItem.type,
+          location: serverItem.level || serverItem.location || '',
+          uniform: serverItem.uniform || '',
+          description: serverItem.description || '',
+          media: serverItem.imageUrl ? [{ type: 'image', url: serverItem.imageUrl }] : [],
+          status: serverItem.status || (action === 'draft' ? 'draft' : 'active'),
+          createdAt: serverItem.createdAt || new Date().toISOString()
+        };
+
+        // update local store
+        items.forEach(i => { if (i.status === 'active') i.status = 'archived'; });
+        if (action === 'publish') setCurrentNewsId(mapped.id);
+        items.unshift(mapped);
+        saveStoredItems(items);
+        showMessage('breakingNewsMessage', action === 'draft' ? 'Saved as draft (server).' : 'Published to spotlight (server).');
+        clearNewsForm();
+        loadBreakingNewsItems();
+        return;
+      }
+    } catch (err) {
+      console.warn('Server publish failed, falling back to local:', err);
+      // fall through to local save
+    }
+  }
+
+  // Local fallback (existing behaviour)
   if (action === 'publish') {
     items.forEach(item => {
       if (item.status === 'active') item.status = 'archived';
     });
-    setCurrentNewsId(newItem.id);
+    setCurrentNewsId(localItem.id);
   }
 
-  items.unshift(newItem);
+  items.unshift(localItem);
   saveStoredItems(items);
 
   showMessage('breakingNewsMessage', action === 'draft' ? 'Saved as draft successfully.' : 'Published to spotlight successfully.');

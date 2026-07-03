@@ -47,7 +47,7 @@
         <div class="container">
             <div class="about-grid">
                 <div class="about-section">
-                    <h2>WELCOME TOCHEPTALAL GIRLS SECONDARY SCHOOL</h2>
+                    <h2>WELCOME TO CHEPTALAL GIRLS SECONDARY SCHOOL</h2>
                     <p>CHEPTALAL GIRLS SECONDARY SCHOOL is a premier educational institution dedicated to providing quality education to young women. Since our establishment, we have been committed to nurturing excellence and developing responsible citizens.</p>
                     <p>Our school believes in the holistic development of students, encompassing academic excellence, character development, and social responsibility.</p>
                 </div>
@@ -157,10 +157,10 @@
                         <div class="leader-image">
                             <i class="fas fa-user-tie"></i>
                         </div>
-                        <h3>KENOLY CHERONOH RUTTO</h3>
+                        <h3>EVALINE CHEBET KOECH</h3>
                         <p><b style="color: lightblue;">DEPUTY PRINCIPAL</b></p>
-                        <p class="bio"> Mrs. Kenoly Cherutoh Rutto serves as the Deputy Principal of Cheptalal Girls Secondary School, overseeing student 
-                            affairs and institutional discipline. With a firm belief that discipline is the foundation of academic success, Mrs Kenoly works 
+                        <p class="bio"> Mrs. Evaline Chebet Koech serves as the Deputy Principal of Cheptalal Girls Secondary School, overseeing student 
+                            affairs and institutional discipline. With a firm belief that discipline is the foundation of academic success, Mrs Koech works 
                             tirelessly to create a structured yet supportive environment for all learners.Beyond administrative duties, she is a passionate 
                             mentor who believes in restorative justice and character building. By fostering a culture of mutual respect, she ensures 
                             that Cheptalal Girls remains a safe and productive space where every student can focus on reaching their highest potential.</p>
@@ -180,6 +180,22 @@
                     </div>
                 </div>
             </section>
+        </div>
+    </section>
+
+    <!-- Location -->
+    <section class="location-section">
+        <div class="container">
+            <h2>Location</h2>
+            <p><b> The School is located in Bomet county, Konoin Subcounty.
+                The route to school from Bomet and Litein routes is 
+                -Kaptengecha Junction(simoti) to Koiwa centre to
+                 Kipkoibet centre to Kobel tea Factory then to school.</b></p>
+
+            <div class="map-container">
+                <h3>Visit Us</h3>
+                <div id="map-about" class="leaflet-map" style="height: 380px;"></div>
+            </div>
         </div>
     </section>
 
@@ -213,5 +229,21 @@
     </footer>
 
     <script src="../js/main.js"></script>
+    <!-- Leaflet Maps (OpenStreetMap) - same map as Contact page -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        function initMapAbout() {
+            const cheptalalCoords = [-0.4764, 35.1231];
+            const map = L.map('map-about').setView(cheptalalCoords, 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            const marker = L.marker(cheptalalCoords, { title: 'CHEPTALAL GIRLS SECONDARY SCHOOL' }).addTo(map);
+            marker.bindPopup('<div style="padding: 10px; text-align: center;"><strong>CHEPTALAL GIRLS SECONDARY SCHOOL</strong><br>Cheptalal, Kenya<br><i class="fas fa-phone"></i> +254 143429289<br><i class="fas fa-envelope"></i> <a href="mailto:cheptalalgirls@gmail.com">cheptalalgirls@gmail.com</a></div>', { maxWidth: 300 }).openPopup();
+        }
+        document.addEventListener('DOMContentLoaded', initMapAbout);
+    </script>
 </body>
 </html>

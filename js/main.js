@@ -374,8 +374,26 @@ function getLatestEventMessage() {
 function updateLatestEventTicker() {
     const ticker = document.getElementById('latestEventTicker');
     if (!ticker) return;
-    ticker.textContent = getLatestEventMessage();
+    // Try to get latest event from server first
+    fetch('/api/events/latest', { cache: 'no-store' })
+        .then(r => r.json())
+        .then(json => {
+            if (json && json.item) {
+                const evt = json.item;
+                const dateString = evt.date ? new Date(evt.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+                ticker.textContent = `${evt.title || 'Latest event'}${dateString ? ` — ${dateString}` : ''}`.trim();
+                return;
+            }
+            // fallback to local storage
+            ticker.textContent = getLatestEventMessage();
+        })
+        .catch(() => {
+            ticker.textContent = getLatestEventMessage();
+        });
 }
+
+// Poll for latest event periodically
+setInterval(updateLatestEventTicker, 15000);
 
 function isAdminQueryMode() {
     const params = new URLSearchParams(window.location.search);
